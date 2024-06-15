@@ -1,8 +1,13 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useEffect } from 'react';
 import './App.css';
+import logo from './logo.svg';
 
 function App() {
+
+  useEffect(() => {
+    console.log(process.env.PUBLIC_URL);
+  }, []);
+  
   return (
     <div className="App">
       <header className="App-header">
