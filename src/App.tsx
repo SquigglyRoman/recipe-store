@@ -13,7 +13,7 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
       {recipes.map(recipe => (
         <RecipeCard recipe={recipe} />
       ))}
