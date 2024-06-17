@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Recipe } from './recipes/models';
 import { getAllRecipes } from './recipes/recipeApi';
+import RecipeCard from './recipes/RecipeCard';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
 
@@ -13,16 +15,7 @@ function App() {
   return (
     <div>
       {recipes.map(recipe => (
-        <div key={recipe.metadata.name}>
-          <h2>{recipe.metadata.name}</h2>
-          <p>Tags:</p>
-          <ul>
-            {recipe.metadata.tags.map(tag => (
-              <li key={tag}>{tag}</li>
-            ))}
-            <a href={recipe.fileUrl} >Open recipe</a>
-          </ul>
-        </div>
+        <RecipeCard recipe={recipe} />
       ))}
     </div>
   );
