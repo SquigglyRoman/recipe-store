@@ -8,6 +8,7 @@ export interface Metadata {
 export interface Recipe {
     metadata: Metadata
     fileUrl: string
+    imageUrl?: string
 }
 
 export interface RecipeFolder {

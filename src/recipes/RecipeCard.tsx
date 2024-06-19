@@ -10,7 +10,7 @@ interface RecipeCardProps {
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     return (
         <Card style={{flex: 1, minWidth: '12rem', maxWidth: '24rem'}} >
-            <Card.Img variant="top" src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
+            <Card.Img variant="top" src={recipe.imageUrl} />
             <Card.Body>
                 <Card.Title>{recipe.metadata.name}</Card.Title>
                 <Card.Text>

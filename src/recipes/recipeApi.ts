@@ -8,24 +8,32 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const recipeFolderContents = await getFolderContents(folder);
-    
-    const metadataFile = findFile(recipeFolderContents, folder, 'metadata.json');
-    const recipeFile = findFile(recipeFolderContents, folder, '.pdf')
+
+    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+    const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
+    const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
 
     const metadataResponse = await axios.get<Metadata>(metadataFile.download_url);
     return {
         metadata: metadataResponse.data,
-        fileUrl: recipeFile.download_url
+        fileUrl: recipeFile.download_url,
+        imageUrl: imageFile?.download_url
     };
 }
 
-function findFile(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder, fileEndsWith: string) {
-    const file = recipeFolderContents.find(file => file.name.endsWith(fileEndsWith));
+function findCriticalFile(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder, ...fileEndings: string[]): RecipeFolderContents {
+    const file = findFile(recipeFolderContents, ...fileEndings);
     if (!file) {
-        throw new Error(`No ${file} file found in folder ${folder.name}`);
-    };
+        throw new Error(`No file with endings ${fileEndings.join(", ")} found in folder ${folder.name}`);
+    }
     return file;
 }
+
+function findFile(recipeFolderContents: RecipeFolderContents[], ...fileEndings: string[]): RecipeFolderContents | undefined {
+    const lowercaseFileEndings = fileEndings.map(ending => ending.toLowerCase());
+    return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.endsWith(ending.toLowerCase())));
+}
+
 
 async function getFolderContents(folder: RecipeFolder): Promise<RecipeFolderContents[]> {
     const recipeFolderContentsResponse = await axios.get<RecipeFolderContents[]>(folder.url);
