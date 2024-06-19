@@ -1,12 +1,14 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import { Recipe } from './recipes/models';
 import { getAllRecipes } from './recipes/recipeApi';
-import RecipeCard from './recipes/RecipeCard';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import Search from './search/search';
+import RecipesGrid from './recipes/RecipesGrid';
 
 function App() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [searchTokens, setSearchTokens] = useState<string[]>([]);
 
   useEffect(() => {
     getAllRecipes().then(setRecipes);
@@ -14,9 +16,8 @@ function App() {
 
   return (
     <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
-      {recipes.map(recipe => (
-        <RecipeCard recipe={recipe} />
-      ))}
+      <Search setSearchTokens={setSearchTokens} />
+      <RecipesGrid searchTokens={searchTokens} recipes={recipes} />
     </div>
   );
 }
