@@ -15,7 +15,7 @@ function App() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px'}}>
       <Search setSearchTokens={setSearchTokens} />
       <RecipesGrid searchTokens={searchTokens} recipes={recipes} />
     </div>

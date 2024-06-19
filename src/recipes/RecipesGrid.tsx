@@ -10,7 +10,7 @@ interface Props {
 
 const RecipesGrid: React.FC<Props> = ({ recipes, searchTokens: searchTokens }) => {
     return (
-        <div>
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
             {recipes
                 .filter(recipe => isMatchedByAnySearchToken(searchTokens, recipe))
                 .map(recipe => (
