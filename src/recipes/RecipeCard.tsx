@@ -2,6 +2,7 @@ import React from 'react';
 import Card from 'react-bootstrap/Card';
 import { Recipe } from './models';
 import { Badge, Button } from 'react-bootstrap';
+import PlaceholderImage from '../resources/placeholder.jpg'
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -9,9 +10,9 @@ interface RecipeCardProps {
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     return (
-        <Card style={{flex: 1, minWidth: '12rem', maxWidth: '24rem'}} >
-            <Card.Img variant="top" src={recipe.imageUrl} />
-            <Card.Body>
+        <Card style={{ flex: 1, minWidth: '12rem', maxWidth: '24rem' }} >
+            <Card.Img style={{ height: '60%', objectFit: 'cover' }} variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
+            <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Card.Title>{recipe.metadata.name}</Card.Title>
                 <Card.Text>
                     <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
@@ -20,10 +21,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                         ))}
                     </div>
                 </Card.Text>
-                <a href={recipe.fileUrl}>
-                    <Button>Show recipe</Button>
-                </a>
             </Card.Body>
+            <a style={{ padding: '1rem' }} href={recipe.fileUrl}>
+                <Button>Show recipe</Button>
+            </a>
         </Card>
     );
 };
