@@ -10,6 +10,7 @@ function App() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [searchTokens, setSearchTokens] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     getAllRecipes().then(setRecipes);
@@ -18,8 +19,8 @@ function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px'}}>
       <Search setSearchTokens={setSearchTokens} />
-      <PopularTags recipes={recipes} />
-      <RecipesGrid searchTokens={searchTokens} recipes={recipes} />
+      <PopularTags recipes={recipes} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+      <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} />
     </div>
   );
 }

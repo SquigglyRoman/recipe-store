@@ -1,79 +1,102 @@
-import { isMatchedByAnySearchToken } from "./filter";
+import { matches } from "./filter";
 import { Recipe } from "./models";
 
-describe("isMatchedByAnySearchToken", () => {
-    it("should return true if searchTokens is empty", () => {
-        const searchTokens: string[] = [];
-        const recipe: Recipe = {
-            metadata: {
-                name: "Recipe 1",
-                tags: ["tag1", "tag2"],
-            },
-            fileUrl: "",
-        };
+type TestCase = {
+    recipeName: string;
+    recipeTags: string[];
+    searchTokens: string[];
+    selectedTags: string[];
+    isMatched: boolean;
+};
 
-        const result = isMatchedByAnySearchToken(searchTokens, recipe);
+const testCases: TestCase[] = [
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: [],
+        selectedTags: [],
+        isMatched: true
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: [],
+        selectedTags: ["tag1"],
+        isMatched: true
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: [],
+        selectedTags: ["tag3"],
+        isMatched: false
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: [],
+        selectedTags: ["tag"],
+        isMatched: false
+    },
+    {
+        recipeName: "Gnocchi",
+        recipeTags: ["Vegan", "Kartoffeln"],
+        searchTokens: ["Gnoc"],
+        selectedTags: [],
+        isMatched: true
+    },
+    {
+        recipeName: "Gnocchi",
+        recipeTags: ["Vegan", "Kartoffeln"],
+        searchTokens: ["Gnoc"],
+        selectedTags: ["Vegan"],
+        isMatched: true
+    },
+    {
+        recipeName: "Gnocchi",
+        recipeTags: ["Vegan", "Kartoffeln"],
+        searchTokens: ["Gnoc"],
+        selectedTags: ["FLOISCH"],
+        isMatched: false
+    },
+    {
+        recipeName: "Gnocchi",
+        recipeTags: ["Vegan", "Kartoffeln"],
+        searchTokens: ["Gnoc"],
+        selectedTags: ["Vegan", "FLOISCH"],
+        isMatched: false
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: ["recipe", "tag2"],
+        selectedTags: [],
+        isMatched: true
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: ["recipe", "tag2", "tag3"],
+        selectedTags: [],
+        isMatched: false
+    },
+    {
+        recipeName: "Recipe 1",
+        recipeTags: ["tag1", "tag2"],
+        searchTokens: ["tag3"],
+        selectedTags: [],
+        isMatched: false
+    },
+];
 
-        expect(result).toBe(true);
-    });
-
-    it("should return true when partially matching", () => {
-        const searchTokens: string[] = ["Gnoc"];
-        const recipe: Recipe = {
-            metadata: {
-                name: "Gnocchi",
-                tags: ["Vegan", "Kartoffeln"],
-            },
-            fileUrl: "",
-        };
-
-        const result = isMatchedByAnySearchToken(searchTokens, recipe);
-
-        expect(result).toBe(true);
-    });
-
-    it("should return true if all search tokens are found in recipe metadata", () => {
-        const searchTokens: string[] = ["recipe", "tag2"];
-        const recipe: Recipe = {
-            metadata: {
-                name: "Recipe 1",
-                tags: ["tag1", "tag2"],
-            },
-            fileUrl: "",
-        };
-
-        const result = isMatchedByAnySearchToken(searchTokens, recipe);
-
-        expect(result).toBe(true);
-    });
-
-    it("should return false if not all search tokens are found in recipe metadata", () => {
-        const searchTokens: string[] = ["recipe", "tag2", "tag3"];
-        const recipe: Recipe = {
-            metadata: {
-                name: "Recipe 1",
-                tags: ["tag1", "tag2"],
-            },
-            fileUrl: "",
-        };
-
-        const result = isMatchedByAnySearchToken(searchTokens, recipe);
-
-        expect(result).toBe(false);
-    });
-
-    it("should return false if no search token is found in recipe metadata", () => {
-        const searchTokens: string[] = ["tag3"];
-        const recipe: Recipe = {
-            metadata: {
-                name: "Recipe 1",
-                tags: ["tag1", "tag2"],
-            },
-            fileUrl: "",
-        };
-
-        const result = isMatchedByAnySearchToken(searchTokens, recipe);
-
-        expect(result).toBe(false);
-    });
+it.each(testCases)("should match if search tokens are %p", ({ recipeName, recipeTags, searchTokens, selectedTags, isMatched }) => {
+    const recipe: Recipe = {
+        metadata: {
+            name: recipeName,
+            tags: recipeTags
+        },
+        fileUrl: ""
+    }
+    const result = matches(recipe, searchTokens, selectedTags);
+    expect(result).toBe(isMatched);
 });
