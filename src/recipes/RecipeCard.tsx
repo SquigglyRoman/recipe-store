@@ -3,6 +3,7 @@ import Card from 'react-bootstrap/Card';
 import { Recipe } from './models';
 import { Badge, Button } from 'react-bootstrap';
 import PlaceholderImage from '../resources/placeholder.jpg'
+import Tags from '../tags/Tags';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -15,11 +16,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Card.Title>{recipe.metadata.name}</Card.Title>
                 <Card.Text>
-                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {recipe.metadata.tags.map(tag => (
-                            <Badge key={tag} bg="secondary">{tag}</Badge>
-                        ))}
-                    </div>
+                    <Tags tags={recipe.metadata.tags} />
                 </Card.Text>
             </Card.Body>
             <a style={{ padding: '1rem' }} href={recipe.fileUrl}>
