@@ -1,11 +1,10 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
-const octokit: Octokit = new Octokit({
-    auth: "TODO"
-});
+let octokit: Octokit;
 
-export async function getAllRecipes(): Promise<Recipe[]> {
+export async function getAllRecipes(apiToken: string): Promise<Recipe[]> {
+    octokit = new Octokit({ auth: apiToken });
     const recipeFolders = await getAllRecipeFolders();
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
