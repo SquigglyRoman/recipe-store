@@ -1,28 +1,29 @@
 import React from 'react';
+import { Button } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
-import { Recipe } from './models';
-import { Badge, Button } from 'react-bootstrap';
-import PlaceholderImage from '../resources/placeholder.jpg'
+import PlaceholderImage from '../resources/placeholder.jpg';
 import Tags from '../tags/Tags';
+import { Recipe } from './models';
 
 interface RecipeCardProps {
     recipe: Recipe;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
+    const openRecipe = () => {
+        window.open(recipe.fileUrl, '_blank');
+    };
+
     return (
-        <Card style={{ flex: 1, minWidth: '12rem', maxWidth: '24rem' }} >
-            <Card.Img style={{ height: '60%', objectFit: 'cover' }} variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
+        <Card onClick={openRecipe} style={{ flex: 1, minWidth: '12rem', maxWidth: '16rem', cursor: 'pointer' }} >
+            <Card.Img style={{ maxHeight: '45%', minHeight: '45%', objectFit: 'cover' }} variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Card.Title>{recipe.metadata.name}</Card.Title>
                 <Card.Text>
                     <Tags tags={recipe.metadata.tags} />
                 </Card.Text>
             </Card.Body>
-            <a style={{ padding: '1rem' }} href={recipe.fileUrl}>
-                <Button>Show recipe</Button>
-            </a>
-        </Card>
+        </Card >
     );
 };
 
