@@ -19,6 +19,7 @@ export interface RecipeFolder {
 
 export interface RecipeFolderContents {
     name: string // filename
+    path: string // path to the file
     download_url: string // url to the raw pdf file
 }
 

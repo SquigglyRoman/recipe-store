@@ -1,5 +1,9 @@
-import axios from "axios";
+import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
+
+const octokit: Octokit = new Octokit({
+    auth: "TODO"
+});
 
 export async function getAllRecipes(): Promise<Recipe[]> {
     const recipeFolders = await getAllRecipeFolders();
@@ -9,16 +13,25 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const recipeFolderContents = await getFolderContents(folder);
 
-    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+    const metadata = await fetchMetadata(recipeFolderContents, folder);
     const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
     const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
 
-    const metadataResponse = await axios.get<Metadata>(metadataFile.download_url);
     return {
-        metadata: metadataResponse.data,
+        metadata,
         fileUrl: recipeFile.download_url,
         imageUrl: imageFile?.download_url
     };
+}
+
+async function fetchMetadata(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder): Promise<Metadata> {
+    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+    const metadataResponse = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: metadataFile.path
+    });
+    return JSON.parse(atob(metadataResponse.data.content)) as Metadata;
 }
 
 function findCriticalFile(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder, ...fileEndings: string[]): RecipeFolderContents {
@@ -34,13 +47,20 @@ function findFile(recipeFolderContents: RecipeFolderContents[], ...fileEndings: 
     return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.endsWith(ending.toLowerCase())));
 }
 
-
 async function getFolderContents(folder: RecipeFolder): Promise<RecipeFolderContents[]> {
-    const recipeFolderContentsResponse = await axios.get<RecipeFolderContents[]>(folder.url);
-    return recipeFolderContentsResponse.data;
+    const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: folder.path
+    });
+    return response.data;
 }
 
 async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
-    const recipesResponse = await axios.get<RecipeFolder[]>('https://api.github.com/repos/SquigglyRoman/recipe-store/contents/recipes');
-    return recipesResponse.data;
+    const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: "recipes"
+    });
+    return response.data;
 }
