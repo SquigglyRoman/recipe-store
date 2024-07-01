@@ -95,7 +95,9 @@ it.each(testCases)("should match if search tokens are %p", ({ recipeName, recipe
             name: recipeName,
             tags: recipeTags
         },
-        fileUrl: ""
+        fileUrl: "",
+        metadataUrl: "",
+        metadataSha: "",
     }
     const result = matches(recipe, searchTokens, selectedTags);
     expect(result).toBe(isMatched);

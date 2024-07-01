@@ -1,5 +1,6 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
+import { createHash } from "crypto";
 
 let octokit: Octokit;
 
@@ -25,23 +26,27 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const recipeFolderContents = await getFolderContents(folder);
 
-    const metadata = await fetchMetadata(recipeFolderContents, folder);
+    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+    const metadata = await fetchMetadataObject(metadataFile.path);
+
     const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
     const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
 
     return {
         metadata,
+        metadataUrl: metadataFile.path,
+        metadataSha: metadataFile.sha, 
         fileUrl: recipeFile.download_url,
         imageUrl: imageFile?.download_url
     };
 }
 
-async function fetchMetadata(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder): Promise<Metadata> {
-    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
+    
     const metadataResponse = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
-        path: metadataFile.path
+        path: metadataFilePath
     });
     return JSON.parse(atob(metadataResponse.data.content)) as Metadata;
 }
@@ -75,4 +80,17 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
         path: "recipes"
     });
     return response.data;
+}
+
+export async function updateMetadata(metadataPath: string, metadataSha: string, metadata: Metadata): Promise<void> {
+    const metadataContent = JSON.stringify(metadata);
+    console.log(metadataSha);
+    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: "recipes/Gnocchi/metadata.json",
+        message: "Update metadata",
+        content: btoa(metadataContent),
+        sha: metadataSha
+    });
 }
