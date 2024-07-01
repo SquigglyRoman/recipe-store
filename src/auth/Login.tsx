@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-import { initApi, isAuthorized } from '../recipes/recipeApi';
+import { isAuthorized } from '../recipes/recipeApi';
+import Cookies from 'js-cookie';
+import { checkIfAuthorized } from './authChecker';
 
 interface LoginProps {
-    setApiToken: React.Dispatch<React.SetStateAction<string | undefined>>
+    setIsAuthorized: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const Login: React.FC<LoginProps> = ({ setApiToken }) => {
+const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
     const [token, setToken] = useState<string>('');
     const [error, setError] = useState<string>('');
 
@@ -18,10 +20,12 @@ const Login: React.FC<LoginProps> = ({ setApiToken }) => {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
         const sanitizedToken = token.trim();
-        initApi(sanitizedToken);
-        const isAuthorizedResponse = await isAuthorized();
-        if (isAuthorizedResponse) {
-            setApiToken(sanitizedToken);
+
+        const isAuthorized = await checkIfAuthorized(sanitizedToken);
+        
+        if (isAuthorized) {
+            setIsAuthorized(true);
+            Cookies.set('apiToken', sanitizedToken, { expires: 95 });
             setError('');
         } else {
             setError('Invalid API key');

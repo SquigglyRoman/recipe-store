@@ -3,17 +3,18 @@ import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
 let octokit: Octokit;
 
-export function initApi(apiToken: string) {
-    octokit = new Octokit({ auth: apiToken });
-}
-
-export async function isAuthorized(): Promise<boolean> {
+export async function isAuthorized(apiToken: string): Promise<boolean> {
+    initApi(apiToken);
     try {
         await octokit.request("GET /user");
         return true;
     } catch (error) {
         return false;
     }
+}
+
+function initApi(apiToken: string) {
+    octokit = new Octokit({ auth: apiToken });
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
