@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Alert } from 'react-bootstrap';
+import { initApi, isAuthorized } from '../recipes/recipeApi';
 
 interface LoginProps {
     setApiToken: React.Dispatch<React.SetStateAction<string | undefined>>
 }
 
-const Login: React.FC<LoginProps> = ({setApiToken}) => {
-    const [token, setToken] = useState('');
+const Login: React.FC<LoginProps> = ({ setApiToken }) => {
+    const [token, setToken] = useState<string>('');
+    const [error, setError] = useState<string>('');
 
     const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
+        setError('');
     };
 
-    // TODO: Test if api token is valid, THEN set it
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
-        setApiToken(token);
+        const sanitizedToken = token.trim();
+        initApi(sanitizedToken);
+        const isAuthorizedResponse = await isAuthorized();
+        if (isAuthorizedResponse) {
+            setApiToken(sanitizedToken);
+            setError('');
+        } else {
+            setError('Invalid API key');
+        }
     };
 
     return (
@@ -32,6 +42,7 @@ const Login: React.FC<LoginProps> = ({setApiToken}) => {
             <Button variant="primary" type="submit">
                 Submit
             </Button>
+            {error && <Alert variant="danger">{error}</Alert>}
         </Form>
     );
 };

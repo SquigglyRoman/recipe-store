@@ -15,7 +15,7 @@ function App() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
-    apiToken && getAllRecipes(apiToken).then(setRecipes);
+    apiToken && getAllRecipes().then(setRecipes);
   }, [apiToken]);
 
   return (
