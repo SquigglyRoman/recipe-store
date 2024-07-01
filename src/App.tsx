@@ -7,6 +7,7 @@ import { Recipe } from './recipes/models';
 import { getAllRecipes } from './recipes/recipeApi';
 import Search from './search/search';
 import PopularTags from './tags/PopularTags';
+import { Spinner } from 'react-bootstrap';
 
 function App() {
 
@@ -29,7 +30,7 @@ function App() {
   return (
     <>
       {isLoading ? (
-        <div>Loading...</div> // Placeholder for loading state
+        <Spinner animation="border" />
       ) : isAuthorized ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <Search setSearchTokens={setSearchTokens} />

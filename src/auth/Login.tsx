@@ -9,6 +9,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
+    const [isChecking, setIsChecking] = useState<boolean>(false);
     const [token, setToken] = useState<string>('');
     const [error, setError] = useState<string>('');
 
@@ -22,7 +23,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
         const sanitizedToken = token.trim();
 
         const isAuthorized = await checkIfAuthorized(sanitizedToken);
-        
+
         if (isAuthorized) {
             setIsAuthorized(true);
             Cookies.set('apiToken', sanitizedToken, { expires: 95 });
@@ -44,7 +45,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
                 />
             </Form.Group>
             <Button variant="primary" type="submit">
-                Submit
+                {isChecking ? 'Checking...' : 'Submit'}
             </Button>
             {error && <Alert variant="danger">{error}</Alert>}
         </Form>
