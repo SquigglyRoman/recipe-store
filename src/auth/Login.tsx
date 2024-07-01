@@ -22,6 +22,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
         event.preventDefault();
         const sanitizedToken = token.trim();
 
+        setIsChecking(true);
         const isAuthorized = await checkIfAuthorized(sanitizedToken);
 
         if (isAuthorized) {
@@ -31,6 +32,8 @@ const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
         } else {
             setError('Invalid API key');
         }
+        
+        setIsChecking(false);
     };
 
     return (

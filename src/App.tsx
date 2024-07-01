@@ -12,7 +12,7 @@ import { Spinner } from 'react-bootstrap';
 function App() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [searchTokens, setSearchTokens] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -20,11 +20,16 @@ function App() {
   useEffect(() => {
     checkIfAuthorizedFromCookie().then((authStatus) => {
       setIsAuthorized(authStatus);
+      setIsLoading(false)
     });
   }, []);
 
   useEffect(() => {
-    isAuthorized && getAllRecipes().then(setRecipes).then(() => setIsLoading(false));
+    if(!isAuthorized) {
+      return;
+    }
+    setIsLoading(true);
+    getAllRecipes().then(setRecipes).then(() => setIsLoading(false));
   }, [isAuthorized]);
 
   return (
