@@ -14,7 +14,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     };
 
     return (
-        <Card onClick={openRecipe} style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', cursor: 'pointer' }} >
+        <Card onClick={openRecipe} style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', height: '24rem', cursor: 'pointer' }} >
             <Card.Img style={{ maxHeight: '45%', minHeight: '45%', objectFit: 'cover' }} variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Card.Title>{recipe.metadata.name}</Card.Title>
