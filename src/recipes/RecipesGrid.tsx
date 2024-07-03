@@ -7,9 +7,11 @@ interface Props {
     recipes: Recipe[]
     searchTokens: string[]
     selectedTags: string[]
+    onUpdate: () => void
 }
 
 const RecipesGrid: React.FC<Props> = ({ recipes, searchTokens, selectedTags }) => {
+    
     return (
         <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
             {recipes

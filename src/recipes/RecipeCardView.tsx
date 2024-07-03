@@ -11,18 +11,23 @@ interface RecipeCardViewProps {
 }
 
 const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) => {
+    const openRecipe = () => {
+        window.open(recipe.fileUrl, '_blank');
+    };
     return (
         <>
-            <RecipeImage recipe={recipe} />
-            <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
-                <Card.Title>
-                    <span>{recipe.metadata.name}</span>
-                </Card.Title>
-                <Card.Text>
-                    <Tags tags={recipe.metadata.tags} />
-                </Card.Text>
-                <Button onClick={(event) => {onClickEdit(event)}}>Update</Button>
-            </Card.Body>
+            <div onClick={openRecipe} style={{ cursor: 'pointer' }}>
+                <RecipeImage recipe={recipe} />
+                <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
+                    <Card.Title>
+                        <span>{recipe.metadata.name}</span>
+                    </Card.Title>
+                    <Card.Text>
+                        <Tags tags={recipe.metadata.tags} />
+                    </Card.Text>
+                </Card.Body>
+            </div>
+            <Button onClick={(event) => { onClickEdit(event) }}>Edit recipe</Button>
         </>
     );
 };

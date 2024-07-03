@@ -1,10 +1,9 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
-import { createHash } from "crypto";
 
 let octokit: Octokit;
 
-export async function isAuthorized(apiToken: string): Promise<boolean> {
+export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
     try {
         await octokit.request("GET /user");
@@ -32,6 +31,8 @@ async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
     const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
 
+    console.log(metadataFile.sha);
+    
     return {
         metadata,
         metadataUrl: metadataFile.path,
@@ -82,15 +83,16 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
     return response.data;
 }
 
-export async function updateMetadata(metadataPath: string, metadataSha: string, metadata: Metadata): Promise<void> {
+export async function updateMetadata(recipe: Recipe): Promise<void> {
+    const metadata = recipe.metadata;
     const metadataContent = JSON.stringify(metadata);
-    console.log(metadataSha);
     await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
         path: "recipes/Gnocchi/metadata.json",
         message: "Update metadata",
         content: btoa(metadataContent),
-        sha: metadataSha
+        sha: recipe.metadataSha
     });
+    // TODO: Check if the update was successful, i.e. if the uploaded metadata matches the one from the change here
 }

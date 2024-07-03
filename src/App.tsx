@@ -1,13 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import Login from './auth/Login';
-import { checkIfAuthorizedFromCookie } from './auth/authChecker';
+import { checkIfAuthorizedFromCookie } from './auth/cookieAuthHandler';
 import RecipesGrid from './recipes/RecipesGrid';
 import { Recipe } from './recipes/models';
 import { getAllRecipes } from './recipes/recipeApi';
 import Search from './search/search';
 import PopularTags from './tags/PopularTags';
 import { Spinner } from 'react-bootstrap';
+import eventBus from './events/EventBus';
+import { EventType } from './events/Events';
 
 function App() {
 
@@ -18,19 +20,23 @@ function App() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
-    checkIfAuthorizedFromCookie().then((authStatus) => {
-      setIsAuthorized(authStatus);
-      setIsLoading(false)
+    eventBus.subscribe(EventType.RECIPE_UPDATED, loadRecipes);
+    checkIfAuthorizedFromCookie().then(isAuthorized => {
+      isAuthorized && handleIsAuthorized();
     });
+
   }, []);
 
-  useEffect(() => {
-    if(!isAuthorized) {
-      return;
-    }
+  async function handleIsAuthorized() {
+    setIsAuthorized(true);
+    loadRecipes();
+    setIsLoading(false);
+  }
+
+  function loadRecipes() {
     setIsLoading(true);
-    getAllRecipes().then(setRecipes).then(() => setIsLoading(false));
-  }, [isAuthorized]);
+    getAllRecipes().then(recipes => { console.log(recipes); setRecipes(recipes) }).then(() => setIsLoading(false));
+  }
 
   return (
     <>
@@ -40,10 +46,10 @@ function App() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <Search setSearchTokens={setSearchTokens} />
           <PopularTags recipes={recipes} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
-          <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} />
+          <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} onUpdate={loadRecipes} />
         </div>
       ) : (
-        <Login setIsAuthorized={setIsAuthorized} />
+        <Login onLoginSuccess={handleIsAuthorized} />
       )}
     </>
   );

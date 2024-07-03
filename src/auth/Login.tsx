@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
-import { isAuthorized } from '../recipes/recipeApi';
 import Cookies from 'js-cookie';
-import { checkIfAuthorized } from './authChecker';
+import React, { useState } from 'react';
+import { Alert, Button, Form } from 'react-bootstrap';
+import { checkTokenValidity } from '../recipes/recipeApi';
+import { saveLogin } from './cookieAuthHandler';
 
 interface LoginProps {
-    setIsAuthorized: React.Dispatch<React.SetStateAction<boolean>>
+    onLoginSuccess: () => void
 }
 
-const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const [isChecking, setIsChecking] = useState<boolean>(false);
     const [token, setToken] = useState<string>('');
     const [error, setError] = useState<string>('');
@@ -23,16 +23,16 @@ const Login: React.FC<LoginProps> = ({ setIsAuthorized }) => {
         const sanitizedToken = token.trim();
 
         setIsChecking(true);
-        const isAuthorized = await checkIfAuthorized(sanitizedToken);
+        const isUserAuthorized = await checkTokenValidity(sanitizedToken);
 
-        if (isAuthorized) {
-            setIsAuthorized(true);
-            Cookies.set('apiToken', sanitizedToken, { expires: 95 });
+        if (isUserAuthorized) {
+            onLoginSuccess();
+            saveLogin(sanitizedToken);
             setError('');
         } else {
             setError('Invalid API key');
         }
-        
+
         setIsChecking(false);
     };
 
