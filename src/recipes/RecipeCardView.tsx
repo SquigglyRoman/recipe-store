@@ -15,20 +15,18 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
         window.open(recipe.fileUrl, '_blank');
     };
     return (
-        <>
-            <div onClick={openRecipe} style={{ cursor: 'pointer' }}>
-                <RecipeImage recipe={recipe} />
-                <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Card.Title>
-                        <span>{recipe.metadata.name}</span>
-                    </Card.Title>
-                    <Card.Text>
-                        <Tags tags={recipe.metadata.tags} />
-                    </Card.Text>
-                </Card.Body>
-            </div>
-            <Button onClick={(event) => { onClickEdit(event) }}>Edit recipe</Button>
-        </>
+        <Card style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', height: '24rem', cursor: 'pointer'}} onClick={openRecipe}>
+            <RecipeImage recipe={recipe} />
+            <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
+                <Card.Title>
+                    <span>{recipe.metadata.name}</span>
+                </Card.Title>
+                <Card.Text>
+                    <Tags tags={recipe.metadata.tags} />
+                </Card.Text>
+                <Button onClick={(event) => { onClickEdit(event) }}>Edit recipe</Button>
+            </Card.Body>
+        </Card>
     );
 };
 

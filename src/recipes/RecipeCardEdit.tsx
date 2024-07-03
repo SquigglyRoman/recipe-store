@@ -31,13 +31,13 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
     }
 
     return (
-        <>
+        <Card style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', height: '24rem' }}>
             <RecipeImage recipe={recipe} />
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
             </Card.Body>
             <Button onClick={onSave}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
-        </>
+        </Card>
     );
 };
 
