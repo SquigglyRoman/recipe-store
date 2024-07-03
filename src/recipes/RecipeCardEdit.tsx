@@ -11,9 +11,11 @@ interface RecipeCardEditProps {
 }
 
 const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
+    const [isSaving, setIsSaving] = useState(false);
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
 
     async function onSave(): Promise<void> {
+        setIsSaving(true);
         const newRecipe = {
             ...recipe,
             metadata: {
@@ -34,7 +36,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
             </Card.Body>
-            <Button onClick={onSave}>Save changes</Button>
+            <Button onClick={onSave}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
         </>
     );
 };
