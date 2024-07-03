@@ -35,7 +35,9 @@ function App() {
 
   function loadRecipes() {
     setIsLoading(true);
-    getAllRecipes().then(recipes => { console.log(recipes); setRecipes(recipes) }).then(() => setIsLoading(false));
+    getAllRecipes()
+      .then(setRecipes)
+      .then(() => setIsLoading(false));
   }
 
   return (

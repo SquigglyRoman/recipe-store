@@ -3,6 +3,10 @@ import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
 let octokit: Octokit;
 
+const noCacheHeader: Record<string, string> = {
+    'If-None-Match': ''
+};
+
 export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
     try {
@@ -31,23 +35,22 @@ async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
     const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
 
-    console.log(metadataFile.sha);
-    
     return {
         metadata,
         metadataUrl: metadataFile.path,
-        metadataSha: metadataFile.sha, 
+        metadataSha: metadataFile.sha,
         fileUrl: recipeFile.download_url,
         imageUrl: imageFile?.download_url
     };
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
-    
+
     const metadataResponse = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
-        path: metadataFilePath
+        path: metadataFilePath,
+        headers: noCacheHeader
     });
     return JSON.parse(atob(metadataResponse.data.content)) as Metadata;
 }
@@ -69,7 +72,8 @@ async function getFolderContents(folder: RecipeFolder): Promise<RecipeFolderCont
     const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
-        path: folder.path
+        path: folder.path,
+        headers: noCacheHeader
     });
     return response.data;
 }
@@ -94,5 +98,19 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
         content: btoa(metadataContent),
         sha: recipe.metadataSha
     });
-    // TODO: Check if the update was successful, i.e. if the uploaded metadata matches the one from the change here
+
+    return await waitUntilFileUpdated(recipe);
+}
+
+async function waitUntilFileUpdated(recipe: Recipe): Promise<void> {
+    console.log("Waiting for metadata to be updated...")
+    let metadataNotUpdated = true;
+    do {
+        const metadata: Metadata = await fetchMetadataObject(recipe.metadataUrl);
+        if (metadata.name === recipe.metadata.name) {
+            metadataNotUpdated = false;
+        }
+    } while (metadataNotUpdated);
+
+    return Promise.resolve();
 }

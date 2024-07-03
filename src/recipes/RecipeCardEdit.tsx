@@ -22,7 +22,6 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
             }
         }
 
-        console.log(newRecipe.metadataSha);
         await updateMetadata(newRecipe);
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
