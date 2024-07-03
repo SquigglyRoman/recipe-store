@@ -14,14 +14,16 @@ interface RecipeCardEditProps {
 const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
+    const [newTags, setNewTags] = useState<string[]>(recipe.metadata.tags);
 
     async function onSave(): Promise<void> {
         setIsSaving(true);
-        const newRecipe = {
+        const newRecipe: Recipe = {
             ...recipe,
             metadata: {
                 ...recipe.metadata,
-                name: newRecipeName
+                name: newRecipeName,
+                tags: newTags
             }
         }
 
@@ -29,6 +31,10 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
         // TODO: Add feedback when successful, e.g. a toast
+    }
+
+    function removeTag(tag: string): void {
+        setNewTags(newTags.filter(t => t !== tag));
     }
 
     return (
@@ -39,7 +45,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
                     <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
                 </Card.Title>
                 <Card.Text>
-                    <RemovableTags tags={recipe.metadata.tags} />
+                    <RemovableTags tags={newTags} onClick={removeTag}/>
                 </Card.Text>
                 <Button onClick={onSave} style={{ marginTop: 'auto' }}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
             </Card.Body>
