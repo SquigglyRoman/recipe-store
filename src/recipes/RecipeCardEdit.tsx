@@ -35,8 +35,8 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
             <RecipeImage recipe={recipe} />
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
                 <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
+                <Button onClick={onSave} style={{marginTop: 'auto'}}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
             </Card.Body>
-            <Button onClick={onSave}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
         </Card>
     );
 };

@@ -24,7 +24,7 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
                 <Card.Text>
                     <Tags tags={recipe.metadata.tags} />
                 </Card.Text>
-                <Button onClick={(event) => { onClickEdit(event) }}>Edit recipe</Button>
+                <Button style={{marginTop: 'auto'}} onClick={(event) => { onClickEdit(event) }}>Edit recipe</Button>
             </Card.Body>
         </Card>
     );
