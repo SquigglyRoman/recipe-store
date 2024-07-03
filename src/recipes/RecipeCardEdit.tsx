@@ -5,6 +5,7 @@ import RecipeImage from './RecipeImage';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { updateMetadata } from './recipeApi';
+import RemovableTags from '../tags/RemovableTags';
 
 interface RecipeCardEditProps {
     recipe: Recipe;
@@ -34,8 +35,13 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe }) => {
         <Card style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', height: '24rem' }}>
             <RecipeImage recipe={recipe} />
             <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
-                <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
-                <Button onClick={onSave} style={{marginTop: 'auto'}}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
+                <Card.Title>
+                    <Form.Control onChange={event => setNewRecipeName(event.target.value)} value={newRecipeName}></Form.Control>
+                </Card.Title>
+                <Card.Text>
+                    <RemovableTags tags={recipe.metadata.tags} />
+                </Card.Text>
+                <Button onClick={onSave} style={{ marginTop: 'auto' }}>{isSaving ? 'Saving changes...' : ' Save changes'}</Button>
             </Card.Body>
         </Card>
     );
