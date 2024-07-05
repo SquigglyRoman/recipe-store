@@ -14,7 +14,7 @@ interface RecipeCardEditProps {
 const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
-    const [newTags, setNewTags] = useState<string[]>(recipe.metadata.tags);
+    const [newTags, setNewTags] = useState<string>(recipe.metadata.tags.join(', '));
 
     async function onSave(): Promise<void> {
         setIsSaving(true);
@@ -23,7 +23,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             metadata: {
                 ...recipe.metadata,
                 name: newRecipeName,
-                tags: newTags
+                tags: newTags.replace(/\s/g, '').split(','),
             }
         }
 
@@ -31,6 +31,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
         // TODO: Add feedback when successful, e.g. a toast
+        setIsSaving(false);
     }
 
     return (
@@ -60,8 +61,8 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
                             type="text"
-                            value={newTags.join(', ')}
-                            onChange={(e) => setNewTags(e.target.value.split(', '))}
+                            value={newTags}
+                            onChange={(e) => setNewTags(e.target.value)}
                         />
                     </Form.Group>
                 </Form>
