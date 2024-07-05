@@ -11,22 +11,22 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
-    const [mode, setMode] = React.useState<'view' | 'edit'>('view');
+    const [showEdit, setShowEdit] = React.useState(false);
 
 
     function onEditClicked(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         event.stopPropagation();
-        setMode('edit');
+        setShowEdit(true);
     }
 
     eventBus.subscribe(EventType.RECIPE_UPDATED, async () => {
-        setMode('view');
+        setShowEdit(false);
     });
 
     return (
         <>
-            {mode === 'view' && <RecipeCardView recipe={recipe} onClickEdit={onEditClicked} />}
-            {mode === 'edit' && <RecipeCardEdit recipe={recipe} />}
+            <RecipeCardView recipe={recipe} onClickEdit={onEditClicked} />
+            {showEdit && <RecipeCardEdit recipe={recipe} show={showEdit} onHide={() => setShowEdit(false)}/>}
         </>
     );
 };
