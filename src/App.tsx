@@ -23,6 +23,7 @@ function App() {
     eventBus.subscribe(EventType.RECIPE_UPDATED, loadRecipes);
     checkIfAuthorizedFromCookie().then(isAuthorized => {
       isAuthorized && handleIsAuthorized();
+      setIsLoading(false);
     });
 
   }, []);

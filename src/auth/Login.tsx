@@ -47,7 +47,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     onChange={handleTokenChange}
                 />
             </Form.Group>
-            <Button variant="primary" type="submit">
+            <Button className="mt-3" variant="primary" type="submit">
                 {isChecking ? 'Checking...' : 'Submit'}
             </Button>
             {error && <Alert variant="danger">{error}</Alert>}
