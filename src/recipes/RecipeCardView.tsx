@@ -35,7 +35,7 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
                     <Tags tags={recipe.metadata.tags} />
                 </Card.Text>
                 <div className="d-flex flex-row gap-2">
-                    <Button className={`${isHovered ? 'd-flex' : 'invisible'} flex-row align-items-center gap-2`} variant="btn btn-outline-primary" onClick={(event) => { onClickEdit(event) }}>
+                    <Button className={'d-flex flex-row align-items-center gap-2'} variant="btn btn-outline-primary" onClick={(event) => { onClickEdit(event) }}>
                         Edit
                         <BsFillPencilFill />
                     </Button>
