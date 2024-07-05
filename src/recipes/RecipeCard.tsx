@@ -1,5 +1,4 @@
 import React from 'react';
-import Card from 'react-bootstrap/Card';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import RecipeCardEdit from './RecipeCardEdit';

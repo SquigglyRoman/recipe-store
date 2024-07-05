@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { Recipe } from './models';
@@ -56,7 +56,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                             onChange={(e) => setNewRecipeName(e.target.value)}
                         />
                     </Form.Group>
-                    <Form.Group controlId="formTags">
+                    <Form.Group className="mt-2" controlId="formTags">
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
                             type="text"
@@ -68,7 +68,10 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Close</Button>
-                <Button variant="primary" onClick={onSave}>Save</Button>
+                <Button variant="primary" onClick={onSave} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                    Save
+                    {isSaving && <Spinner animation="border" size='sm'/>}
+                </Button>
             </Modal.Footer>
         </Modal>
     );
