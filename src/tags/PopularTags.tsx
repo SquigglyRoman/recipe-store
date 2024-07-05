@@ -39,7 +39,7 @@ const PopularTags: React.FC<PopularTagsProps> = ({ recipes, selectedTags, setSel
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+        <div className="d-flex flex-row gap-2">
             <span>Popular tags:</span>
             <Tags tags={tagsSortedByPopularity} selectedTags={selectedTags} onClick={handleTagClicked} />
         </div>

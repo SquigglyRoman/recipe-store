@@ -45,7 +45,7 @@ function App() {
       {isLoading ? (
         <Spinner animation="border" />
       ) : isAuthorized ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div className="d-flex flex-column gap-4">
           <Search setSearchTokens={setSearchTokens} />
           <PopularTags recipes={recipes} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
           <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} onUpdate={loadRecipes} />

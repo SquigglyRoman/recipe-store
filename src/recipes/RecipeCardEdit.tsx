@@ -68,7 +68,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Close</Button>
-                <Button variant="primary" onClick={onSave} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                <Button variant="primary" onClick={onSave} className="d-flex align-items-center gap-2">
                     Save
                     {isSaving && <Spinner animation="border" size='sm'/>}
                 </Button>

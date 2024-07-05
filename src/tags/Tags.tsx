@@ -1,5 +1,4 @@
 import React from 'react';
-import Badge from 'react-bootstrap/Badge';
 import Tag from './Tag';
 
 interface TagsProps {
@@ -10,7 +9,7 @@ interface TagsProps {
 
 const Tags: React.FC<TagsProps> = ({ tags, selectedTags, onClick }) => {
     return (
-        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+        <div className="d-flex gap-1 flex-wrap">
             {tags.map(tag => (
                 <Tag key={tag} name={tag} isSelected={selectedTags?.includes(tag) ?? false} onClick={onClick}/>
             ))}

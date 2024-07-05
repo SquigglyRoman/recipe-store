@@ -13,7 +13,7 @@ interface Props {
 const RecipesGrid: React.FC<Props> = ({ recipes, searchTokens, selectedTags }) => {
     
     return (
-        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
+        <div className="d-flex gap-4 flex-wrap">
             {recipes
                 .filter(recipe => matches(recipe, searchTokens, selectedTags))
                 .map(recipe => (

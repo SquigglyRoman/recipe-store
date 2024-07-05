@@ -9,7 +9,7 @@ interface TagsProps {
 
 const Tags: React.FC<TagsProps> = ({ name, isSelected, onClick }) => {
     return (
-        <Badge bg={isSelected ? 'primary' : 'secondary'} onClick={_ => onClick && onClick(name)} style={{cursor: onClick ? 'pointer' : 'auto', userSelect: 'none' }}>{name}</Badge>
+        <Badge className="user-select-none" bg={isSelected ? 'primary' : 'secondary'} onClick={_ => onClick && onClick(name)} style={{cursor: onClick ? 'pointer' : 'auto'}}>{name}</Badge>
     );
 };
 

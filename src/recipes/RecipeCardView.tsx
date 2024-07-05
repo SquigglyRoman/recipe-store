@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
 import Tags from '../tags/Tags';
-import RecipeImage from './RecipeImage';
+import PlaceholderImage from '../resources/placeholder.jpg';
 import { Recipe } from './models';
 
 interface RecipeCardViewProps {
@@ -15,9 +15,9 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
         window.open(recipe.fileUrl, '_blank');
     };
     return (
-        <Card style={{ flex: 1, minWidth: '10rem', maxWidth: '14rem', height: '24rem', cursor: 'pointer'}} onClick={openRecipe}>
-            <RecipeImage recipe={recipe} />
-            <Card.Body style={{ display: 'flex', flexDirection: 'column' }}>
+        <Card className="d-flex col-5 col-sm-4 col-md-3 col-lg-2" style={{cursor: 'pointer'}} onClick={openRecipe}>
+            <Card.Img className="h-50 object-fit-cover" variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
+            <Card.Body>
                 <Card.Title>
                     <span>{recipe.metadata.name}</span>
                 </Card.Title>
