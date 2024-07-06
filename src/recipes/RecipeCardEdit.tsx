@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { Recipe } from './models';
@@ -17,6 +17,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
     const [newTags, setNewTags] = useState<string>(recipe.metadata.tags.join(', '));
     const [newFile, setNewFile] = useState<File | undefined>(undefined);
+    const [error, setError] = useState<string>('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,8 +32,15 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             }
         }
 
-        await updateMetadata(newRecipe);
-        newFile && await uploadRecipeFile(recipe, newFile);
+        try {
+            await updateMetadata(newRecipe);
+            newFile && await uploadRecipeFile(recipe, newFile);
+        } catch (error) {
+            setError('Something went wrong, please try again later.');
+            console.log(error);
+            setIsSaving(false);
+            return;
+        }
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
         // TODO: Add feedback when successful, e.g. a toast
@@ -86,11 +94,14 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>Close</Button>
-                <Button variant="primary" onClick={onSave} disabled={isSaving} className="d-flex align-items-center gap-2">
-                    Save
-                    {isSaving && <Spinner animation="border" size='sm'/>}
-                </Button>
+                {error && <p className='text-danger'>{error}</p>}
+                <span className='d-flex gap-1'>
+                    <Button variant="secondary" onClick={onHide}>Close</Button>
+                    <Button variant="primary" onClick={onSave} disabled={isSaving} className="d-flex align-items-center gap-2">
+                        Save
+                        {isSaving && <Spinner animation="border" size='sm' />}
+                    </Button>
+                </span>
             </Modal.Footer>
         </Modal>
     );
