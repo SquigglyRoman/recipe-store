@@ -1,6 +1,5 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
-import { rejects } from "assert";
 
 let octokit: Octokit;
 
@@ -123,7 +122,6 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
     return await waitUntilFileUpdated(recipe);
 }
 
-// Receives a recipe and pdf file and uploads the file to the recipe folder
 export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();

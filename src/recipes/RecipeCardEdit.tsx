@@ -41,8 +41,6 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
 
     function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>): void {
         setNewFile(event.target.files?.[0]);
-        
-        // Handle the file upload logic here
     }
 
     return (
@@ -77,9 +75,10 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                         />
                     </Form.Group>
                     <Form.Group className="mt-2" controlId="formFile">
-                        <Form.Label>Upload PDF</Form.Label>
+                        <Form.Label>Update recipe PDF</Form.Label>
                         <Form.Control
                             type="file"
+                            accept='.pdf'
                             ref={fileInputRef}
                             onChange={handleFileSelected}
                         />
@@ -88,7 +87,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Close</Button>
-                <Button variant="primary" onClick={onSave} className="d-flex align-items-center gap-2">
+                <Button variant="primary" onClick={onSave} disabled={isSaving} className="d-flex align-items-center gap-2">
                     Save
                     {isSaving && <Spinner animation="border" size='sm'/>}
                 </Button>
