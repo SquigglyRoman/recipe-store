@@ -43,7 +43,6 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
-        // TODO: Add feedback when successful, e.g. a toast
         setIsSaving(false);
     }
 
