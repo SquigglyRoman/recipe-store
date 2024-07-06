@@ -20,13 +20,36 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     }
 }
 
-function initApi(apiToken: string) {
-    octokit = new Octokit({ auth: apiToken });
-}
-
 export async function getAllRecipes(): Promise<Recipe[]> {
     const recipeFolders = await getAllRecipeFolders();
     return Promise.all(recipeFolders.map(fetchRecipeData));
+}
+
+export async function updateMetadata(recipe: Recipe): Promise<void> {
+    const metadata = recipe.metadata;
+    const metadataContent = JSON.stringify(metadata);
+    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: recipe.files.metadata.path,
+        message: "Update metadata",
+        content: btoa(metadataContent),
+        sha: recipe.files.metadata.sha
+    });
+
+    return await waitUntilFileUpdated(recipe);
+}
+
+export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = () => upload(reader, recipe, file).then(resolve).catch(reject);
+    })
+}
+
+function initApi(apiToken: string) {
+    octokit = new Octokit({ auth: apiToken });
 }
 
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
@@ -105,29 +128,6 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
         path: "recipes"
     });
     return response.data;
-}
-
-export async function updateMetadata(recipe: Recipe): Promise<void> {
-    const metadata = recipe.metadata;
-    const metadataContent = JSON.stringify(metadata);
-    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
-        path: recipe.files.metadata.path,
-        message: "Update metadata",
-        content: btoa(metadataContent),
-        sha: recipe.files.metadata.sha
-    });
-
-    return await waitUntilFileUpdated(recipe);
-}
-
-export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(file);
-        reader.onload = () => upload(reader, recipe, file).then(resolve).catch(reject);
-    })
 }
 
 async function upload(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
