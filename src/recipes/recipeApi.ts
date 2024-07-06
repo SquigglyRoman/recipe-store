@@ -126,25 +126,20 @@ export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
-        reader.onload = async () => {
-            try {
-                const arrayBuffer = reader.result as ArrayBuffer;
-
-                await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-                    owner,
-                    repo,
-                    path: `${recipe.path}/${file.name}`,
-                    message: `Updated recipe file of ${recipe.metadata.name}`,
-                    content: arrayBufferToBase64(arrayBuffer),
-                });
-
-                resolve();
-            } catch (error) {
-                reject(error);
-            }
-        }
+        reader.onload = () => upload(reader, recipe, file).then(resolve).catch(reject);
     })
+}
 
+async function upload(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
+    const arrayBuffer = reader.result as ArrayBuffer;
+
+    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path: `${recipe.path}/${file.name}`,
+        message: `Updated recipe file of ${recipe.metadata.name}`,
+        content: arrayBufferToBase64(arrayBuffer),
+    });
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
