@@ -41,17 +41,15 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
 }
 
 export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+    const path = recipe.files.recipe.path;
+    const sha = recipe.files.recipe.sha;
 
-        const action: () => Promise<void> = recipe.files.recipe.name === file.name ?
-            () => updateExistingFile(reader, recipe, file) :
-            () => uploadNewFile(reader, recipe, file)
-                .then(() => deleteFile(recipe));
-
-        reader.readAsArrayBuffer(file);
-        reader.onload = () => action().then(resolve).catch(reject);
-    })
+    if (recipe.files.recipe.name === file.name) {
+        await updateExistingFile(file, path, sha);
+        return;
+    }
+    await uploadNewFile(file, `${recipe.path}/${file.name}`)
+    await deleteFile(path, sha);
 }
 
 function initApi(apiToken: string) {
@@ -136,55 +134,47 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
     return response.data;
 }
 
-async function uploadNewFile(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
-    console.log(`Uploading new file ${file.name} to ${recipe.path}`);
-    const arrayBuffer = reader.result as ArrayBuffer;
+async function uploadNewFile(file: File, path: string): Promise<void> {
+    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path: path,
+        message: `Updated file ${path}`,
+        content: await toBase64(file),
+    });
+}
+
+async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
+    console.log(`Updating existing file ${path}`);
 
     await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
-        path: `${recipe.path}/${file.name}`,
-        message: `Updated recipe file of ${recipe.metadata.name}`,
-        content: arrayBufferToBase64(arrayBuffer),
+        path,
+        message: `Updated file ${path}`,
+        content: await toBase64(file),
+        sha
     });
 }
 
-async function updateExistingFile(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
-    console.log(`Updating existing file ${file.name} to ${recipe.path}`);
-    const arrayBuffer = reader.result as ArrayBuffer;
-
-    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-        owner,
-        repo,
-        path: `${recipe.path}/${file.name}`,
-        message: `Updated recipe file of ${recipe.metadata.name}`,
-        content: arrayBufferToBase64(arrayBuffer),
-        sha: recipe.files.recipe.sha
-    });
-}
-
-async function deleteFile(recipe: Recipe): Promise<void> {
-    console.log(`Deleting file ${recipe.files.recipe.name} from ${recipe.path}`);
-
+export async function deleteFile(path: string, sha: string): Promise<void> {
     await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
-        path: recipe.files.recipe.path,
-        message: `Deleted recipe file of ${recipe.metadata.name}`,
-        sha: recipe.files.recipe.sha
+        path,
+        message: `Deleted file ${path}`,
+        sha
     });
 }
 
-function arrayBufferToBase64(buffer: ArrayBuffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
+async function toBase64(file: File): Promise<string> {
+    const reader = new FileReader();
+    return new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(',')[1]); // The split removes the 'data:application/pdf;base64,' part
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
-
 
 async function waitUntilFileUpdated(recipe: Recipe): Promise<void> {
     let metadataNotUpdated = true;
