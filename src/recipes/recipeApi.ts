@@ -1,11 +1,15 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
+import { rejects } from "assert";
 
 let octokit: Octokit;
 
 const noCacheHeader: Record<string, string> = {
     'If-None-Match': ''
 };
+
+const owner = "SquigglyRoman";
+const repo = "recipe-store";
 
 export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
@@ -37,18 +41,35 @@ async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
 
     return {
         metadata,
-        metadataUrl: metadataFile.path,
-        metadataSha: metadataFile.sha,
-        fileUrl: recipeFile.download_url,
-        imageUrl: imageFile?.download_url
+        files: {
+            metadata: {
+                name: metadataFile.name,
+                sha: metadataFile.sha,
+                path: metadataFile.path,
+                url: metadataFile.download_url
+            },
+            recipe: {
+                name: recipeFile.name,
+                sha: recipeFile.sha,
+                path: recipeFile.path,
+                url: recipeFile.download_url
+            },
+            previewImage: imageFile ? {
+                name: imageFile.name,
+                sha: imageFile.sha,
+                path: imageFile.path,
+                url: imageFile.download_url
+            } : undefined
+        },
+        path: folder.path
     };
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
 
     const metadataResponse = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
+        owner,
+        repo,
         path: metadataFilePath,
         headers: noCacheHeader
     });
@@ -96,17 +117,53 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
         path: "recipes/Gnocchi/metadata.json",
         message: "Update metadata",
         content: btoa(metadataContent),
-        sha: recipe.metadataSha
+        sha: recipe.files.metadata.sha
     });
 
     return await waitUntilFileUpdated(recipe);
 }
 
+// Receives a recipe and pdf file and uploads the file to the recipe folder
+export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = async () => {
+            try {
+                const arrayBuffer = reader.result as ArrayBuffer;
+
+                await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+                    owner,
+                    repo,
+                    path: `${recipe.path}/${file.name}`,
+                    message: `Updated recipe file of ${recipe.metadata.name}`,
+                    content: arrayBufferToBase64(arrayBuffer),
+                });
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        }
+    })
+
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+    var binary = '';
+    var bytes = new Uint8Array(buffer);
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+
 async function waitUntilFileUpdated(recipe: Recipe): Promise<void> {
-    console.log("Waiting for metadata to be updated...")
     let metadataNotUpdated = true;
     do {
-        const metadata: Metadata = await fetchMetadataObject(recipe.metadataUrl);
+        const metadata: Metadata = await fetchMetadataObject(recipe.files.metadata.path);
         if (metadata.name === recipe.metadata.name) {
             metadataNotUpdated = false;
         }

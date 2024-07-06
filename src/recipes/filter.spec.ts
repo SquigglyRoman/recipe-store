@@ -1,5 +1,5 @@
 import { matches } from "./filter";
-import { Recipe } from "./models";
+import { Metadata, Recipe } from "./models";
 
 type TestCase = {
     recipeName: string;
@@ -90,15 +90,10 @@ const testCases: TestCase[] = [
 ];
 
 it.each(testCases)("should match if search tokens are %p", ({ recipeName, recipeTags, searchTokens, selectedTags, isMatched }) => {
-    const recipe: Recipe = {
-        metadata: {
-            name: recipeName,
-            tags: recipeTags
-        },
-        fileUrl: "",
-        metadataUrl: "",
-        metadataSha: "",
+    const metadata: Metadata = {
+        name: recipeName,
+        tags: recipeTags
     }
-    const result = matches(recipe, searchTokens, selectedTags);
+    const result = matches(metadata, searchTokens, selectedTags);
     expect(result).toBe(isMatched);
 });

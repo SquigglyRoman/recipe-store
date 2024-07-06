@@ -12,10 +12,9 @@ interface RecipeCardViewProps {
 }
 
 const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) => {
-    const [isHovered, setIsHovered] = useState<boolean>(false);
 
     const openRecipe = () => {
-        window.open(recipe.fileUrl, '_blank');
+        window.open(recipe.files.recipe.url, '_blank');
     };
 
     return (
@@ -23,10 +22,8 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
             className="d-flex col-5 col-sm-4 col-md-3 col-lg-2"
             style={{ cursor: 'pointer' }}
             onClick={openRecipe}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
-            <Card.Img className="h-50 object-fit-cover" variant="top" src={recipe.imageUrl ?? PlaceholderImage} />
+            <Card.Img className="h-50 object-fit-cover" variant="top" src={recipe.files.previewImage?.url ?? PlaceholderImage} />
             <Card.Body className="d-flex flex-column">
                 <Card.Title>
                     <span>{recipe.metadata.name}</span>

@@ -1,15 +1,15 @@
-import { Recipe } from "./models";
+import { Metadata, Recipe } from "./models";
 
-export function matches(recipe: Recipe, searchTokens: string[], selectedTags: string[]): boolean {
-    return isPartiallyMatchedByAnySearchToken(searchTokens, recipe) && isFullyMatchedByAllTags(recipe, selectedTags);
+export function matches(metadata: Metadata, searchTokens: string[], selectedTags: string[]): boolean {
+    return isPartiallyMatchedByAnySearchToken(searchTokens, metadata) && isFullyMatchedByAllTags(metadata, selectedTags);
 }
 
-function isPartiallyMatchedByAnySearchToken(searchTokens: string[], recipe: Recipe): boolean {
+function isPartiallyMatchedByAnySearchToken(searchTokens: string[], metadata: Metadata): boolean {
     if (!searchTokens.length) {
         return true;
     }
 
-    const recipeTokens = [recipe.metadata.name, ...recipe.metadata.tags]
+    const recipeTokens = [metadata.name, ...metadata.tags]
         .map(token => token.toLowerCase());
 
     return searchTokens
@@ -17,10 +17,10 @@ function isPartiallyMatchedByAnySearchToken(searchTokens: string[], recipe: Reci
         .every(searchToken => recipeTokens.some(recipeToken => recipeToken.includes(searchToken)));
 }
 
-function isFullyMatchedByAllTags(recipe: Recipe, selectedTags: string[]) {
+function isFullyMatchedByAllTags(metadata: Metadata, selectedTags: string[]) {
     if (!selectedTags.length) {
         return true;
     }
 
-    return selectedTags.every(selectedTag => recipe.metadata.tags.includes(selectedTag));
+    return selectedTags.every(selectedTag => metadata.tags.includes(selectedTag));
 }

@@ -3,7 +3,8 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { Recipe } from './models';
-import { updateMetadata } from './recipeApi';
+import { updateMetadata, uploadRecipeFile } from './recipeApi';
+import { useRef } from 'react';
 
 interface RecipeCardEditProps {
     recipe: Recipe;
@@ -15,6 +16,9 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
     const [isSaving, setIsSaving] = useState(false);
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
     const [newTags, setNewTags] = useState<string>(recipe.metadata.tags.join(', '));
+    const [newFile, setNewFile] = useState<File | undefined>(undefined);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     async function onSave(): Promise<void> {
         setIsSaving(true);
@@ -28,10 +32,17 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
 
         await updateMetadata(newRecipe);
+        newFile && await uploadRecipeFile(recipe, newFile);
 
         eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
         // TODO: Add feedback when successful, e.g. a toast
         setIsSaving(false);
+    }
+
+    function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>): void {
+        setNewFile(event.target.files?.[0]);
+        
+        // Handle the file upload logic here
     }
 
     return (
@@ -63,6 +74,14 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                             type="text"
                             value={newTags}
                             onChange={(e) => setNewTags(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mt-2" controlId="formFile">
+                        <Form.Label>Upload PDF</Form.Label>
+                        <Form.Control
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileSelected}
                         />
                     </Form.Group>
                 </Form>

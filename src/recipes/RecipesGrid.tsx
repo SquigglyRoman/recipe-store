@@ -15,7 +15,7 @@ const RecipesGrid: React.FC<Props> = ({ recipes, searchTokens, selectedTags }) =
     return (
         <div className="d-flex gap-4 flex-wrap">
             {recipes
-                .filter(recipe => matches(recipe, searchTokens, selectedTags))
+                .filter(recipe => matches(recipe.metadata, searchTokens, selectedTags))
                 .map(recipe => (
                     <RecipeCard key={recipe.metadata.name} recipe={recipe} />
                 ))}

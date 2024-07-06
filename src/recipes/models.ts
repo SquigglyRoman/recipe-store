@@ -5,12 +5,23 @@ export interface Metadata {
     url?: string
 }
 
+export interface File {
+    name: string
+    sha: string
+    path: string
+    url: string
+}
+
+export interface Files {
+    metadata: File
+    recipe: File
+    previewImage?: File
+}
+
 export interface Recipe {
     metadata: Metadata
-    fileUrl: string
-    metadataUrl: string
-    metadataSha: string
-    imageUrl?: string
+    path: string
+    files: Files
 }
 
 export interface RecipeFolder {
