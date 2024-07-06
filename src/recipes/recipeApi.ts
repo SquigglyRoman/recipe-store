@@ -160,6 +160,7 @@ async function waitUntilFileUpdated(recipe: Recipe): Promise<void> {
         if (metadata.name === recipe.metadata.name) {
             metadataNotUpdated = false;
         }
+        await new Promise(resolve => setTimeout(resolve, 500));
     } while (metadataNotUpdated);
 
     return Promise.resolve();
