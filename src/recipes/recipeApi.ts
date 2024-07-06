@@ -43,8 +43,14 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
 export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
+
+        const action: () => Promise<void> = recipe.files.recipe.name === file.name ?
+            () => updateExistingFile(reader, recipe, file) :
+            () => uploadNewFile(reader, recipe, file)
+                .then(() => deleteFile(recipe));
+
         reader.readAsArrayBuffer(file);
-        reader.onload = () => upload(reader, recipe, file).then(resolve).catch(reject);
+        reader.onload = () => action().then(resolve).catch(reject);
     })
 }
 
@@ -130,7 +136,8 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
     return response.data;
 }
 
-async function upload(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
+async function uploadNewFile(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
+    console.log(`Uploading new file ${file.name} to ${recipe.path}`);
     const arrayBuffer = reader.result as ArrayBuffer;
 
     await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
@@ -139,6 +146,32 @@ async function upload(reader: FileReader, recipe: Recipe, file: File): Promise<v
         path: `${recipe.path}/${file.name}`,
         message: `Updated recipe file of ${recipe.metadata.name}`,
         content: arrayBufferToBase64(arrayBuffer),
+    });
+}
+
+async function updateExistingFile(reader: FileReader, recipe: Recipe, file: File): Promise<void> {
+    console.log(`Updating existing file ${file.name} to ${recipe.path}`);
+    const arrayBuffer = reader.result as ArrayBuffer;
+
+    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path: `${recipe.path}/${file.name}`,
+        message: `Updated recipe file of ${recipe.metadata.name}`,
+        content: arrayBufferToBase64(arrayBuffer),
+        sha: recipe.files.recipe.sha
+    });
+}
+
+async function deleteFile(recipe: Recipe): Promise<void> {
+    console.log(`Deleting file ${recipe.files.recipe.name} from ${recipe.path}`);
+
+    await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path: recipe.files.recipe.path,
+        message: `Deleted recipe file of ${recipe.metadata.name}`,
+        sha: recipe.files.recipe.sha
     });
 }
 
