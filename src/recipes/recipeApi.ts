@@ -114,7 +114,7 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
     await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
-        path: "recipes/Gnocchi/metadata.json",
+        path: recipe.files.metadata.path,
         message: "Update metadata",
         content: btoa(metadataContent),
         sha: recipe.files.metadata.sha
