@@ -90,7 +90,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
                         <Form.Label>Thumbnail</Form.Label>
                         <div className="d-flex flex-column">
                             <img src={newThumbnail?.base64 ?? currentThumbnail} alt="Recipe" className="img-fluid rounded mb-2" />
-                            <Button variant="outline-primary" onClick={() => thumbnailInputRef.current?.click()}>Update Image</Button>
+                            <Button variant="outline-primary" onClick={() => thumbnailInputRef.current?.click()}>Select new image</Button>
                         </div>
                         <Form.Control
                             type="file"
