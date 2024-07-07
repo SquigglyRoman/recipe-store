@@ -1,5 +1,6 @@
 import { Octokit } from "octokit";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
+import { toBase64 } from "./Base64";
 
 let octokit: Octokit;
 
@@ -41,6 +42,7 @@ export async function updateMetadata(recipe: Recipe): Promise<void> {
 }
 
 export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
+    console.log(`Uploading recipe file ${file.name} to ${recipe.path}`);
     const path = recipe.files.recipe.path;
     const sha = recipe.files.recipe.sha;
 
@@ -50,6 +52,24 @@ export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void
     }
     await uploadNewFile(file, `${recipe.path}/${file.name}`)
     await deleteFile(path, sha);
+}
+
+export async function uploadThumbnail(recipe: Recipe, file: File): Promise<void> {
+    const path = `${recipe.path}/${file.name}`;
+    console.log(`Updating thumbnail ${path}`);
+    const base64Content = await toBase64(file);
+
+    const recipeCurrentlyHasNoThumbnail = !recipe.files.previewImage;
+    const newFileHasDiffentNameThanCurrentThumbnail = recipe.files.previewImage?.name !== file.name;
+
+    if(recipeCurrentlyHasNoThumbnail) {
+        await put(base64Content, path);
+    } else if(newFileHasDiffentNameThanCurrentThumbnail) {
+        await put(base64Content, path);
+        await deleteFile(recipe.files.previewImage?.path ?? '', recipe.files.previewImage?.sha ?? '');
+    } else {
+        await put(base64Content, path, recipe.files.previewImage?.sha);
+    }
 }
 
 function initApi(apiToken: string) {
@@ -112,7 +132,7 @@ function findCriticalFile(recipeFolderContents: RecipeFolderContents[], folder: 
 
 function findFile(recipeFolderContents: RecipeFolderContents[], ...fileEndings: string[]): RecipeFolderContents | undefined {
     const lowercaseFileEndings = fileEndings.map(ending => ending.toLowerCase());
-    return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.endsWith(ending.toLowerCase())));
+    return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.toLowerCase().endsWith(ending.toLowerCase())));
 }
 
 async function getFolderContents(folder: RecipeFolder): Promise<RecipeFolderContents[]> {
@@ -147,12 +167,16 @@ async function uploadNewFile(file: File, path: string): Promise<void> {
 async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
     console.log(`Updating existing file ${path}`);
 
+    await put(await toBase64(file), path, sha);
+}
+
+async function put(base64Content: string, path: string, sha?: string) {
     await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
         path,
         message: `Updated file ${path}`,
-        content: await toBase64(file),
+        content: base64Content,
         sha
     });
 }
@@ -164,15 +188,6 @@ export async function deleteFile(path: string, sha: string): Promise<void> {
         path,
         message: `Deleted file ${path}`,
         sha
-    });
-}
-
-async function toBase64(file: File): Promise<string> {
-    const reader = new FileReader();
-    return new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve((reader.result as string).split(',')[1]); // The split removes the 'data:application/pdf;base64,' part
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
     });
 }
 

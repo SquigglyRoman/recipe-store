@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
-import Tags from '../tags/Tags';
-import PlaceholderImage from '../resources/placeholder.jpg';
-import { Recipe } from './models';
 import { BsFillPencilFill } from "react-icons/bs";
+import Tags from '../tags/Tags';
+import { Recipe } from './models';
+import PlaceholderImage from './PlaceholderImage';
 
 interface RecipeCardViewProps {
     recipe: Recipe;
