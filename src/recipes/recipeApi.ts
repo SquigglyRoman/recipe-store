@@ -83,7 +83,7 @@ async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
     const metadata = await fetchMetadataObject(metadataFile.path);
 
     const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
-    const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png')
+    const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png', '.webp')
 
     return {
         metadata,
