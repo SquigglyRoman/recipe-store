@@ -1,7 +1,7 @@
 import React from 'react';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
-import RecipeCardEdit from './RecipeCardEdit';
+import RecipeCardEdit from './EditRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
 import { Recipe } from './models';
 
