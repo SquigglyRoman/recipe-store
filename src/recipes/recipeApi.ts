@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
-import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 import { toBase64 } from "./Base64";
+import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
 let octokit: Octokit;
 
@@ -26,22 +26,23 @@ export async function getAllRecipes(): Promise<Recipe[]> {
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
 
-export async function updateMetadata(recipe: Recipe): Promise<void> {
-    const metadata = recipe.metadata;
+export async function updateRecipeMetadata(recipe: Recipe): Promise<void> {
+    uploadMetadata(recipe.metadata, recipe.files.metadata.path, recipe.files.metadata.sha);
+}
+
+async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
     const metadataContent = JSON.stringify(metadata);
     await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
         owner: "SquigglyRoman",
         repo: "recipe-store",
-        path: recipe.files.metadata.path,
+        path: `${recipePath}/metadata.json`,
         message: "Update metadata",
         content: btoa(metadataContent),
-        sha: recipe.files.metadata.sha
+        sha: sha
     });
-
-    return await waitUntilFileUpdated(recipe);
 }
 
-export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void> {
+export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {
     console.log(`Uploading recipe file ${file.name} to ${recipe.path}`);
     const path = recipe.files.recipe.path;
     const sha = recipe.files.recipe.sha;
@@ -54,7 +55,15 @@ export async function uploadRecipeFile(recipe: Recipe, file: File): Promise<void
     await deleteFile(path, sha);
 }
 
-export async function uploadThumbnail(recipe: Recipe, file: File): Promise<void> {
+export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
+    const recipePath = `recipes/${metadata.name}`;
+    
+    await uploadMetadata(metadata, recipePath);
+    await uploadNewFile(recipeFile, `${recipePath}/${recipeFile.name}`);
+    thumbnail && await uploadNewFile(thumbnail, `${recipePath}/${thumbnail.name}`);
+}
+
+export async function updateThumbnail(recipe: Recipe, file: File): Promise<void> {
     const path = `${recipe.path}/${file.name}`;
     console.log(`Updating thumbnail ${path}`);
     const base64Content = await toBase64(file);
@@ -155,18 +164,10 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
 }
 
 async function uploadNewFile(file: File, path: string): Promise<void> {
-    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-        owner,
-        repo,
-        path: path,
-        message: `Updated file ${path}`,
-        content: await toBase64(file),
-    });
+    await put(await toBase64(file), path);
 }
 
 async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
-    console.log(`Updating existing file ${path}`);
-
     await put(await toBase64(file), path, sha);
 }
 
@@ -189,17 +190,4 @@ export async function deleteFile(path: string, sha: string): Promise<void> {
         message: `Deleted file ${path}`,
         sha
     });
-}
-
-async function waitUntilFileUpdated(recipe: Recipe): Promise<void> {
-    let metadataNotUpdated = true;
-    do {
-        const metadata: Metadata = await fetchMetadataObject(recipe.files.metadata.path);
-        if (metadata.name === recipe.metadata.name) {
-            metadataNotUpdated = false;
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-    } while (metadataNotUpdated);
-
-    return Promise.resolve();
 }

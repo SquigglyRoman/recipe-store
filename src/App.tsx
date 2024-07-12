@@ -10,6 +10,7 @@ import PopularTags from './tags/PopularTags';
 import { Spinner } from 'react-bootstrap';
 import eventBus from './events/EventBus';
 import { EventType } from './events/Events';
+import AddRecipe from './recipes/AddRecipe';
 
 function App() {
 
@@ -47,7 +48,10 @@ function App() {
         <Spinner animation="border" />
       ) : isAuthorized ? (
         <div className="d-flex flex-column gap-4">
-          <Search setSearchTokens={setSearchTokens} />
+          <div className="d-flex gap-2">
+            <Search setSearchTokens={setSearchTokens} />
+            <AddRecipe />
+          </div>
           <PopularTags recipes={recipes} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
           <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} onUpdate={loadRecipes} />
         </div>

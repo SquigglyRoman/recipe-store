@@ -1,13 +1,10 @@
-import { Recipe } from "../recipes/models";
 
 export enum EventType {
     RECIPE_UPDATED = "RECIPE_UPDATED",
     USER_AUTHORIZED = "USER_AUTHORIZED"
 }
 
-export type RecipeUpdatedEvent = {
-    recipe: Recipe;
-}
+export type RecipeUpdatedEvent = {}
 
 export type UserAuthorizedEvent = {}
 

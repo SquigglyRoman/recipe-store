@@ -5,7 +5,7 @@ import { EventType } from '../events/Events';
 import { toBase64 } from './Base64';
 import PlaceholderImage from './PlaceholderImage';
 import { Recipe } from './models';
-import { updateMetadata, uploadRecipeFile, uploadThumbnail } from './recipeApi';
+import { updateRecipeMetadata, updateRecipeFile, updateThumbnail } from './recipeApi';
 
 type RecipeCardEditProps = {
     recipe: Recipe;
@@ -42,9 +42,9 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
 
         try {
-            await updateMetadata(newRecipe);
-            newRecipeFile && await uploadRecipeFile(recipe, newRecipeFile);
-            newThumbnail && await uploadThumbnail(recipe, newThumbnail.file);
+            await updateRecipeMetadata(newRecipe);
+            newRecipeFile && await updateRecipeFile(recipe, newRecipeFile);
+            newThumbnail && await updateThumbnail(recipe, newThumbnail.file);
         } catch (error) {
             setError('Something went wrong, please try again later.');
             console.log(error);

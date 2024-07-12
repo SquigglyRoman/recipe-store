@@ -12,11 +12,13 @@ const Search: React.FC<SearchProps> = ({ setSearchTokens }) => {
     };
 
     return (
-        <Form.Control
-            type="text"
-            placeholder="Search recipes..."
-            onChange={handleQueryChange}
-        />
+        <div className='col-12 col-sm-9 col-md-6 col-lg-4'>
+            <Form.Control
+                type="text"
+                placeholder="Search recipes..."
+                onChange={handleQueryChange}
+            />
+        </div>
     );
 };
 
