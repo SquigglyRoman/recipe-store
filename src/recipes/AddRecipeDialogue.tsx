@@ -19,7 +19,6 @@ type Thumbnail = {
 
 const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
     const [validated, setValidated] = useState(false);
-    const [isFormValid, setIsFormValid] = useState(false);
 
     const [isSaving, setIsSaving] = useState(false);
     const [recipeName, setRecipeName] = useState('');
@@ -36,11 +35,11 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
     }, [recipeName, tags, recipeFile]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
-        checkFormValidity(event);
-
-        if (!isFormValid) {
+        if (!checkFormValidity(event)) {
             return;
         }
+
+        setIsSaving(true);
 
         const metadata: Metadata = {
             name: recipeName,
@@ -56,16 +55,14 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         }
 
         setIsSaving(false);
-
-
     }
 
-    function checkFormValidity(event: React.FormEvent<HTMLFormElement>): void {
+    function checkFormValidity(event: React.FormEvent<HTMLFormElement>): boolean {
         const form = event.currentTarget
-        setIsFormValid(form.checkValidity());
         event.preventDefault();
         event.stopPropagation();
         setValidated(true);
+        return form.checkValidity();
     }
 
 
