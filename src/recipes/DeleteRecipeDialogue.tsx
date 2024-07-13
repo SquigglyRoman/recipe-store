@@ -34,15 +34,15 @@ const DeleteRecipeDialogue: React.FC<DeleteRecipeDialogueProps> = ({ show, onHid
                 <Modal.Title>Confirm Deletion</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                Are you sure you want to delete this recipe?
+                Are you sure you want to delete recipe "{recipe.metadata.name}"?
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>
                     Cancel
                 </Button>
-                <Button variant="danger" onClick={handleDelete}>
+                <Button className="d-flex flex-row align-items-center gap-1" variant="danger" onClick={handleDelete}>
                     {isDeleting ? 'Deleting...' : 'Delete'}
-                    {isDeleting && <Spinner animation="border" />}
+                    {isDeleting && <Spinner size="sm" animation="border" />}
                 </Button>
             </Modal.Footer>
         </Modal>
