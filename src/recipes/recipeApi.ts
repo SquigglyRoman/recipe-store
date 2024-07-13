@@ -1,7 +1,6 @@
 import { Octokit } from "octokit";
 import { decode, encodeFile, encodeObject } from "./Base64";
 import { GitFile, GitResource, Metadata, Recipe } from "./models";
-import { upload } from "@testing-library/user-event/dist/upload";
 
 let octokit: Octokit;
 
@@ -11,6 +10,7 @@ const noCacheHeader: Record<string, string> = {
 
 const owner = "SquigglyRoman";
 const repo = "recipe-store";
+const recipesRootPath = "recipes";
 
 export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
@@ -23,7 +23,7 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
-    const recipeFolders = await getAllRecipeFolders();
+    const recipeFolders = await get(recipesRootPath);
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
 
@@ -45,7 +45,7 @@ export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
-    const recipePath = `recipes/${metadata.name}`;
+    const recipePath = `${recipesRootPath}/${metadata.name}`;
     
     await uploadMetadata(metadata, recipePath);
     await uploadFile(recipeFile, `${recipePath}/${recipeFile.name}`);
@@ -142,10 +142,6 @@ async function getFolderContents(folder: GitResource): Promise<GitFile[]> {
         headers: noCacheHeader
     });
     return response.data;
-}
-
-async function getAllRecipeFolders(): Promise<GitResource[]> {
-    return get('recipes');
 }
 
 /**
