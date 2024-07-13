@@ -155,7 +155,7 @@ const AddOrEditRecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, r
                     <span className='d-flex gap-2 mt-3'>
                         <Button variant="secondary" onClick={onHide}>Close</Button>
                         <Button type="submit" variant="primary" disabled={isSaving} className="d-flex align-items-center gap-2">
-                            Save
+                            {isSaving ? 'Saving...' : 'Save'}
                             {isSaving && <Spinner animation="border" size='sm' />}
                         </Button>
                     </span>

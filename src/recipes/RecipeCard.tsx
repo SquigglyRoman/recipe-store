@@ -1,9 +1,9 @@
 import React from 'react';
 import AddOrEditRecipeDialogue from './AddOrEditRecipeDialogue';
+import DeleteRecipeDialogue from './DeleteRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
 import { Metadata, Recipe } from './models';
 import { updateRecipe } from './recipeApi';
-import DeleteRecipeDialogue from './DeleteRecipeDialogue';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -13,13 +13,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     const [showEdit, setShowEdit] = React.useState(false);
     const [showDelete, setShowDelete] = React.useState(false);
 
-    function onEditClicked(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-        event.stopPropagation();
+    function onEditClicked() {
         setShowEdit(true);
     }
 
-    function onDeleteClicked(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-        event.stopPropagation();
+    function onDeleteClicked() {
         setShowDelete(true);
     }
 
