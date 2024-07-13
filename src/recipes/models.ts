@@ -1,5 +1,3 @@
-import { GetByText } from "@testing-library/react"
-
 export interface Metadata {
     name: string
     tags: string[]
