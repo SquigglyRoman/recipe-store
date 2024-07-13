@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import { BsPlus } from 'react-icons/bs';
-import AddRecipeDialogue from './AddRecipeDialogue';
+import { Metadata } from './models';
+import { uploadNewRecipe } from './recipeApi';
+import AddOrEditRecipeDialogue from './AddOrEditRecipeDialogue';
 
 const AddRecipe: React.FC = () => {
     const [showDialogue, setShowDialogue] = useState(false);
+
+    async function onSave(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
+        if (!recipeFile) {
+            return Promise.reject('Recipe file is required');
+        }
+        await uploadNewRecipe(metadata, recipeFile, thumbnail);
+    }
 
     return (
         <div>
@@ -12,7 +21,12 @@ const AddRecipe: React.FC = () => {
                 Add Recipe
                 <BsPlus />
             </Button>
-            <AddRecipeDialogue show={showDialogue} onHide={() => setShowDialogue(false)} />
+            <AddOrEditRecipeDialogue
+                title={'Add new recipe'}
+                show={showDialogue}
+                onHide={() => setShowDialogue(false)}
+                onSave={onSave}
+                recipeFileIsMandatory />
         </div>
     );
 };

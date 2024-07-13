@@ -1,9 +1,8 @@
 import React from 'react';
-import eventBus from '../events/EventBus';
-import { EventType } from '../events/Events';
-import RecipeCardEdit from './EditRecipeDialogue';
+import AddOrEditRecipeDialogue from './AddOrEditRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
-import { Recipe } from './models';
+import { Metadata, Recipe } from './models';
+import { updateRecipe } from './recipeApi';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -18,14 +17,20 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         setShowEdit(true);
     }
 
-    eventBus.subscribe(EventType.RECIPE_UPDATED, async () => {
-        setShowEdit(false);
-    });
+    async function onSave(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
+        await updateRecipe(recipe.path, metadata, recipeFile, thumbnail);
+    }
 
     return (
         <>
             <RecipeCardView recipe={recipe} onClickEdit={onEditClicked} />
-            {showEdit && <RecipeCardEdit recipe={recipe} show={showEdit} onHide={() => setShowEdit(false)}/>}
+            {showEdit && <AddOrEditRecipeDialogue
+                title={"Edit recipe"}
+                currentRecipe={recipe}
+                show={showEdit}
+                onSave={onSave}
+                onHide={() => setShowEdit(false)} />
+            }
         </>
     );
 };

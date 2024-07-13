@@ -3,13 +3,17 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { encodeFile } from './Base64';
-import { Metadata } from './models';
+import { Metadata, Recipe } from './models';
 import PlaceholderImage from './PlaceholderImage';
-import { uploadNewRecipe } from './recipeApi';
+
 
 type RecipeCardEditProps = {
-    show: boolean;
-    onHide: () => void;
+    title: string
+    show: boolean
+    recipeFileIsMandatory?: boolean
+    onHide: () => void
+    onSave: (metadata: Metadata, recipeFile?: File, thumbnail?: File) => Promise<void>
+    currentRecipe?: Recipe
 }
 
 type Thumbnail = {
@@ -17,14 +21,14 @@ type Thumbnail = {
     base64: string
 }
 
-const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
+const AddOrEditRecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSave, currentRecipe }) => {
     const [validated, setValidated] = useState(false);
 
-    const [isSaving, setIsSaving] = useState(false);
-    const [recipeName, setRecipeName] = useState('');
-    const [tags, setTags] = useState<string>('');
-    const [recipeFile, setRecipeFile] = useState<File>(new File([], ''));
-    const [thumbnail, setThumbnail] = useState<Thumbnail | undefined>();
+    const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [recipeName, setRecipeName] = useState<string>(currentRecipe?.metadata.name ?? '');
+    const [tags, setTags] = useState<string>(currentRecipe?.metadata.tags.join(', ') ?? '');
+    const [selectedRecipeFile, setSelectedRecipeFile] = useState<File>();
+    const [selectedThumbnail, setSelectedThumbnail] = useState<Thumbnail>();
     const [error, setError] = useState<string>('');
 
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +36,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
 
     useEffect(() => {
         setValidated(false);
-    }, [recipeName, tags, recipeFile]);
+    }, [recipeName, tags, selectedRecipeFile]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         if (!checkFormValidity(event)) {
@@ -47,7 +51,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         }
 
         try {
-            await uploadNewRecipe(metadata, recipeFile, thumbnail?.file);
+            await onSave(metadata, selectedRecipeFile, selectedThumbnail?.file);
             eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, {});
         } catch (error) {
             setError('Something went wrong, please try again later.');
@@ -66,10 +70,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
     }
 
     function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>): void {
-        const file = event.target.files?.[0];
-        if (file) {
-            setRecipeFile(file);
-        };
+        setSelectedRecipeFile(event.target.files?.[0]);
     }
 
     async function handleThumbnailSelected(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
@@ -77,7 +78,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         if (!file) {
             return;
         }
-        setThumbnail({
+        setSelectedThumbnail({
             file,
             base64: await encodeFile(file, 'WITH_TYPE_INFORMATION')
         });
@@ -93,7 +94,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Add new recipe
+                    {title}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -101,7 +102,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
                     <Form.Group controlId="formImage" className='w-50' >
                         <Form.Label>Thumbnail</Form.Label>
                         <div className="d-flex flex-column">
-                            <img src={thumbnail?.base64 ?? PlaceholderImage} alt="Recipe" className="img-fluid rounded mb-2" />
+                            <img src={selectedThumbnail?.base64 ?? PlaceholderImage} alt="Recipe" className="img-fluid rounded mb-2" />
                             <Button variant="outline-primary" onClick={() => thumbnailInputRef.current?.click()}>Select image</Button>
                         </div>
                         <Form.Control
@@ -139,15 +140,17 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
                     <Form.Group className="mt-3" controlId="formFile">
                         <Form.Label>Recipe file</Form.Label>
                         <Form.Control
-                            required
+                            required={recipeFileIsMandatory}
                             type="file"
                             accept='application/pdf'
                             ref={recipeFileInputRef}
                             onChange={handleFileSelected}
                         />
-                        <Form.Control.Feedback type="invalid">
-                            Please choose a PDF file
-                        </Form.Control.Feedback>
+                        {recipeFileIsMandatory &&
+                            <Form.Control.Feedback type="invalid">
+                                Please choose a PDF file
+                            </Form.Control.Feedback>
+                        }
                     </Form.Group>
                     <span className='d-flex gap-2 mt-3'>
                         <Button variant="secondary" onClick={onHide}>Close</Button>
@@ -165,4 +168,4 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
     );
 };
 
-export default RecipeCardEdit;
+export default AddOrEditRecipeDialogue;
