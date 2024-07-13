@@ -28,8 +28,8 @@ const PopularTags: React.FC<PopularTagsProps> = ({ recipes, selectedTags, setSel
     });
 
     const popularTags = Object.keys(tagCounts)
-        .sort((a, b) => tagCounts[b] - tagCounts[a])
         .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => tagCounts[b] - tagCounts[a])
         .slice(0, 8);
 
     function handleTagClicked(tag: string): void {
