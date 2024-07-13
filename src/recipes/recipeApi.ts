@@ -43,6 +43,14 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
     thumbnail && await uploadFile(thumbnail, `${recipeRootPath}/${thumbnail.name}`);
 }
 
+export async function deleteRecipe(recipeRootPath: string): Promise<void> {
+    const { metadata, recipeFile, thumbnail } = await fetchRecipeFiles(recipeRootPath);
+    
+    await deleteResource(metadata.path, metadata.sha);
+    await deleteResource(recipeFile.path, recipeFile.sha);
+    thumbnail && await deleteResource(thumbnail.path, thumbnail.sha);
+}
+
 function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
 }

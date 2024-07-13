@@ -1,17 +1,18 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
-import { BsFillPencilFill } from "react-icons/bs";
+import { BsFillPencilFill, BsFillTrashFill } from "react-icons/bs";
 import Tags from '../tags/Tags';
 import { Recipe } from './models';
 import PlaceholderImage from './PlaceholderImage';
 
 interface RecipeCardViewProps {
     recipe: Recipe;
-    onClickEdit: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onEditClicked: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onDeleteClicked: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) => {
+const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onEditClicked, onDeleteClicked }) => {
 
     const openRecipe = () => {
         window.open(recipe.recipeFileUrl, '_blank');
@@ -32,9 +33,13 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
                     <Tags tags={recipe.metadata.tags} />
                 </Card.Text>
                 <div className="d-flex flex-row gap-2">
-                    <Button className={'d-flex flex-row align-items-center gap-2'} variant="btn btn-outline-primary" onClick={(event) => { onClickEdit(event) }}>
+                    <Button className={'d-flex flex-row align-items-center gap-2'} variant="btn btn-primary" onClick={(event) => { onEditClicked(event) }}>
                         Edit
                         <BsFillPencilFill />
+                    </Button>
+                    <Button className={'d-flex flex-row align-items-center gap-2'} variant="btn btn-danger" onClick={(event) => { onDeleteClicked(event) }}>
+                        Delete
+                        <BsFillTrashFill />
                     </Button>
                 </div>
             </Card.Body>
