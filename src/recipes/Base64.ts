@@ -20,9 +20,12 @@ export async function encodeFile(file: File, option?: 'WITH_TYPE_INFORMATION'): 
         reader.readAsDataURL(file);
     });
 }
+export function decodeToObject<T>(encoded: string): T {
+    const utf8Decoded = decode(encoded);
+    return JSON.parse(utf8Decoded) as T;
+}
 
 export function decode(encoded: string): string {
     const bytes = base64.decode(encoded);
-    const utf8Decoded = utf8.decode(bytes);
-    return utf8Decoded;
+    return utf8.decode(bytes);
 }

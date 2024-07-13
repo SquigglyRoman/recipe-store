@@ -1,3 +1,4 @@
+import { GetByText } from "@testing-library/react"
 
 export interface Metadata {
     name: string
@@ -33,4 +34,8 @@ export interface GitResource {
 
 export interface GitFile extends GitResource {
     download_url: string
+}
+
+export interface GitFileWithContent extends GitFile {
+    content: string // base64 encoded string representing the file content
 }

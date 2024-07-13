@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
-import { decode, encodeFile, encodeObject } from "./Base64";
-import { GitFile, GitResource, Metadata, Recipe } from "./models";
+import { decode, decodeToObject, encodeFile, encodeObject } from "./Base64";
+import { GitFile, GitFileWithContent, GitResource, Metadata, Recipe } from "./models";
 
 let octokit: Octokit;
 
@@ -23,7 +23,7 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
-    const recipeFolders = await get(recipesRootPath);
+    const recipeFolders = await get<GitResource[]>(recipesRootPath);
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
 
@@ -75,7 +75,7 @@ function initApi(apiToken: string) {
 }
 
 async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
-    const recipeFolderContents = await getFolderContents(folder);
+    const recipeFolderContents = await get<GitFile[]>(folder.path);
 
     const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
     const metadata = await fetchMetadataObject(metadataFile.path);
@@ -110,15 +110,8 @@ async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
-
-    const metadataResponse = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-        owner,
-        repo,
-        path: metadataFilePath,
-        headers: noCacheHeader
-    });
-    const decoded = decode(metadataResponse.data.content);
-    return JSON.parse(decoded) as Metadata;
+    const metadataFile = await get<GitFileWithContent>(metadataFilePath, true);
+    return decodeToObject<Metadata>(metadataFile.content);
 }
 
 function findCriticalFile(recipeFolderContents: GitFile[], folder: GitResource, ...fileEndings: string[]): GitFile {
@@ -134,24 +127,14 @@ function findFile(recipeFolderContents: GitFile[], ...fileEndings: string[]): Gi
     return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.toLowerCase().endsWith(ending.toLowerCase())));
 }
 
-async function getFolderContents(folder: GitResource): Promise<GitFile[]> {
-    const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
-        path: folder.path,
-        headers: noCacheHeader
-    });
-    return response.data;
-}
-
 /**
- * @param sha optinal, needed if the file already exists 
+ * @param sha optional, needed if the file already exists 
  */
 async function uploadFile(file: File, path: string, sha?: string): Promise<void> {
     await put(await encodeFile(file), path, sha);
 }
 
-async function get(path: string, cached?: boolean): Promise<GitResource[]> {
+async function get<T>(path: string, cached?: boolean): Promise<T> {
     const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
@@ -162,7 +145,7 @@ async function get(path: string, cached?: boolean): Promise<GitResource[]> {
 }
 
 /**
- * @param sha optinal, needed if the file already exists 
+ * @param sha optional, needed if the file already exists 
  */
 async function put(base64Content: string, path: string, sha?: string) {
     console.log(`Uploading ${path}`);
