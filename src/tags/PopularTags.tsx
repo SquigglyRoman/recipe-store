@@ -27,9 +27,10 @@ const PopularTags: React.FC<PopularTagsProps> = ({ recipes, selectedTags, setSel
         }
     });
 
-    const tagsSortedByPopularity = Object.keys(tagCounts)
+    const popularTags = Object.keys(tagCounts)
         .sort((a, b) => tagCounts[b] - tagCounts[a])
         .sort((a, b) => a.localeCompare(b))
+        .slice(0, 8);
 
     function handleTagClicked(tag: string): void {
         if (selectedTags.map(selectedTag => selectedTag).includes(tag)) {
@@ -41,7 +42,7 @@ const PopularTags: React.FC<PopularTagsProps> = ({ recipes, selectedTags, setSel
     return (
         <div className="d-flex flex-row gap-2">
             <span>Popular tags:</span>
-            <Tags tags={tagsSortedByPopularity} selectedTags={selectedTags} onClick={handleTagClicked} />
+            <Tags tags={popularTags} selectedTags={selectedTags} onClick={handleTagClicked} />
         </div>
     );
 };

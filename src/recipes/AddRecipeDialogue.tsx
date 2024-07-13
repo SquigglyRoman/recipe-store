@@ -160,7 +160,6 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
             </Modal.Body>
             <Modal.Footer>
                 {error && <p className='text-danger'>{error}</p>}
-
             </Modal.Footer>
         </Modal>
     );
