@@ -24,20 +24,13 @@ export interface Recipe {
     files: Files
 }
 
-export interface RecipeFolder {
+export interface GitResource {
     name: string
     path: string
     url: string
-}
-
-export interface RecipeFolderContents {
-    name: string // filename
-    path: string // path to the file
-    download_url: string // url to the raw file
     sha: string
 }
 
-export interface RecipeFile {
-    path: string
-    url: string
+export interface GitFile extends GitResource {
+    download_url: string
 }
