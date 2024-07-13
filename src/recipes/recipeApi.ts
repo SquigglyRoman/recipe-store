@@ -27,49 +27,30 @@ export async function getAllRecipes(): Promise<Recipe[]> {
     return Promise.all(recipeFolders.map(folder => folder.path).map(fetchRecipeData));
 }
 
-export async function uploadMetadata(metadata: Metadata, recipePath: string): Promise<void> {
-    const path = `${recipePath}/metadata.json`;
-    const metadataFromGit = await get<GitFile>(path);
-    await put(encodeObject<Metadata>(metadata), path, metadataFromGit.sha);
+export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata, newRecipeFile?: File, newThumbnail?: File): Promise<void> {
+    const { metadata: currentMetadata, recipeFile: currentRecipeFile, thumbnail: currentThumbnail } = await fetchRecipeFiles(recipeRootPath);
+
+    await uploadMetadata(newMetadata, recipeRootPath, currentMetadata);
+    newRecipeFile && await replaceFile(recipeRootPath, newRecipeFile, currentRecipeFile);
+    newThumbnail && await replaceFile(recipeRootPath, newThumbnail, currentThumbnail);
 }
 
-export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {
-    console.log(`Uploading recipe file ${file.name} to ${recipe.path}`);
-    const path = recipe.files.recipe.path;
-    const sha = recipe.files.recipe.sha;
+async function uploadMetadata(newMetadata: Metadata, recipePath: string, currentMetadata?: GitFile): Promise<void> {
+    const path = `${recipePath}/metadata.json`;
+    await put(encodeObject<Metadata>(newMetadata), path, currentMetadata?.sha);
+}
 
-    if (recipe.files.recipe.name === file.name) {
-        await uploadFile(file, path, sha);
-        return;
-    }
-    await uploadFile(file, `${recipe.path}/${file.name}`)
-    await deleteResource(path, sha);
+async function replaceFile(recipeRootPath: string, file: File, currentFile?: GitFile): Promise<void> {
+    currentFile && await deleteGitFile(currentFile);
+    await uploadFile(file, `${recipeRootPath}/${file.name}`);
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
-    const recipePath = `${recipesRootPath}/${metadata.name}`;
+    const recipeRootPath = `${recipesRootPath}/${metadata.name}`;
 
-    await uploadMetadata(metadata, recipePath);
-    await uploadFile(recipeFile, `${recipePath}/${recipeFile.name}`);
-    thumbnail && await uploadFile(thumbnail, `${recipePath}/${thumbnail.name}`);
-}
-
-export async function updateThumbnail(recipe: Recipe, file: File): Promise<void> {
-    const path = `${recipe.path}/${file.name}`;
-    console.log(`Updating thumbnail ${path}`);
-    const base64Content = await encodeFile(file);
-
-    const recipeCurrentlyHasNoThumbnail = !recipe.files.previewImage;
-    const newFileHasDiffentNameThanCurrentThumbnail = recipe.files.previewImage?.name !== file.name;
-
-    if (recipeCurrentlyHasNoThumbnail) {
-        await put(base64Content, path);
-    } else if (newFileHasDiffentNameThanCurrentThumbnail) {
-        await put(base64Content, path);
-        await deleteResource(recipe.files.previewImage?.path ?? '', recipe.files.previewImage?.sha ?? '');
-    } else {
-        await put(base64Content, path, recipe.files.previewImage?.sha);
-    }
+    await uploadMetadata(metadata, recipeRootPath);
+    await uploadFile(recipeFile, `${recipeRootPath}/${recipeFile.name}`);
+    thumbnail && await uploadFile(thumbnail, `${recipeRootPath}/${thumbnail.name}`);
 }
 
 function initApi(apiToken: string) {
@@ -77,29 +58,29 @@ function initApi(apiToken: string) {
 }
 
 async function fetchRecipeData(recipeFolderPath: string): Promise<Recipe> {
-    const { metadataFile, recipeFile, imageFile } = await fetchRecipeFiles(recipeFolderPath);
-    const metadata = await fetchMetadataObject(metadataFile.path);
+    const { metadata: metadataGitFile, recipeFile: recipeGitFile, thumbnail: thumbnailGitFile } = await fetchRecipeFiles(recipeFolderPath);
+    const metadata = await fetchMetadataObject(metadataGitFile.path);
 
     return {
         metadata,
         files: {
             metadata: {
-                name: metadataFile.name,
-                sha: metadataFile.sha,
-                path: metadataFile.path,
-                url: metadataFile.download_url
+                name: metadataGitFile.name,
+                sha: metadataGitFile.sha,
+                path: metadataGitFile.path,
+                url: metadataGitFile.download_url
             },
             recipe: {
-                name: recipeFile.name,
-                sha: recipeFile.sha,
-                path: recipeFile.path,
-                url: recipeFile.download_url
+                name: recipeGitFile.name,
+                sha: recipeGitFile.sha,
+                path: recipeGitFile.path,
+                url: recipeGitFile.download_url
             },
-            previewImage: imageFile ? {
-                name: imageFile.name,
-                sha: imageFile.sha,
-                path: imageFile.path,
-                url: imageFile.download_url
+            previewImage: thumbnailGitFile ? {
+                name: thumbnailGitFile.name,
+                sha: thumbnailGitFile.sha,
+                path: thumbnailGitFile.path,
+                url: thumbnailGitFile.download_url
             } : undefined
         },
         path: recipeFolderPath
@@ -107,13 +88,13 @@ async function fetchRecipeData(recipeFolderPath: string): Promise<Recipe> {
 
 }
 
-async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadataFile: GitFile, recipeFile: GitFile, imageFile?: GitFile }> {
+async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadata: GitFile, recipeFile: GitFile, thumbnail?: GitFile }> {
     const recipeFolderContents = await get<GitFile[]>(recipeRootPath);
 
-    const metadataFile = findCriticalFile(recipeFolderContents, /metadata\.json/);
-    const recipeFile = findCriticalFile(recipeFolderContents, /recipe\.pdf/);
-    const imageFile = findFile(recipeFolderContents, /thumbnail\.(jpg|jpeg|png|webp)/i);
-    return { metadataFile, recipeFile, imageFile };
+    const metadata = findCriticalFile(recipeFolderContents, /metadata\.json/);
+    const recipeFile = findCriticalFile(recipeFolderContents, /pdf$/i);
+    const thumbnail = findFile(recipeFolderContents, /\.(jpg|jpeg|png|webp)$/i);
+    return { metadata, recipeFile, thumbnail };
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
@@ -163,6 +144,10 @@ async function put(base64Content: string, path: string, sha?: string) {
         content: base64Content,
         sha
     });
+}
+
+export async function deleteGitFile(file: GitFile): Promise<void> {
+    await deleteResource(file.path, file.sha);
 }
 
 export async function deleteResource(path: string, sha: string): Promise<void> {

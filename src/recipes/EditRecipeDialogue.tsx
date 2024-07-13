@@ -4,8 +4,8 @@ import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { encodeFile } from './Base64';
 import PlaceholderImage from './PlaceholderImage';
-import { Recipe } from './models';
-import { updateRecipeFile, updateThumbnail, uploadMetadata } from './recipeApi';
+import { Metadata, Recipe } from './models';
+import { updateRecipe } from './recipeApi';
 
 type RecipeCardEditProps = {
     recipe: Recipe;
@@ -32,19 +32,13 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
 
     async function onSave(): Promise<void> {
         setIsSaving(true);
-        const newRecipe: Recipe = {
-            ...recipe,
-            metadata: {
-                ...recipe.metadata,
-                name: newRecipeName,
-                tags: newTags.replace(/\s/g, '').split(','),
-            }
-        }
+        const newMetadata: Metadata = {
+            name: newRecipeName,
+            tags: newTags.split(',').map(tag => tag.trim())
+        };
 
         try {
-            await uploadMetadata(newRecipe.metadata, newRecipe.path);
-            newRecipeFile && await updateRecipeFile(recipe, newRecipeFile);
-            newThumbnail && await updateThumbnail(recipe, newThumbnail.file);
+            await updateRecipe(recipe.path, newMetadata, newRecipeFile, newThumbnail?.file);
         } catch (error) {
             setError('Something went wrong, please try again later.');
             console.log(error);
@@ -52,7 +46,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
             return;
         }
 
-        eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newRecipe });
+        eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, { recipe: newMetadata });
         setIsSaving(false);
     }
 
