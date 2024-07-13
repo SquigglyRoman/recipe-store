@@ -79,11 +79,11 @@ function initApi(apiToken: string) {
 async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
     const recipeFolderContents = await get<GitFile[]>(folder.path);
 
-    const metadataFile = findCriticalFile(recipeFolderContents, folder, 'metadata.json');
+    const metadataFile = findCriticalFile(recipeFolderContents, /metadata\.json/);
     const metadata = await fetchMetadataObject(metadataFile.path);
 
-    const recipeFile = findCriticalFile(recipeFolderContents, folder, '.pdf')
-    const imageFile = findFile(recipeFolderContents, '.jpg', '.jpeg', '.png', '.webp')
+    const recipeFile = findCriticalFile(recipeFolderContents, /recipe\.pdf/)
+    const imageFile = findFile(recipeFolderContents, /thumbnail\.(jpg|jpeg|png|webp)/i)
 
     return {
         metadata,
@@ -116,17 +116,16 @@ async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> 
     return decodeToObject<Metadata>(metadataFile.content);
 }
 
-function findCriticalFile(recipeFolderContents: GitFile[], folder: GitResource, ...fileEndings: string[]): GitFile {
-    const file = findFile(recipeFolderContents, ...fileEndings);
+function findCriticalFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile {
+    const file = findFile(recipeFolderContents, regexp);
     if (!file) {
-        throw new Error(`No file with endings ${fileEndings.join(", ")} found in folder ${folder.name}`);
+        throw new Error(`No file matching ${regexp} found.`);
     }
     return file;
 }
 
-function findFile(recipeFolderContents: GitFile[], ...fileEndings: string[]): GitFile | undefined {
-    const lowercaseFileEndings = fileEndings.map(ending => ending.toLowerCase());
-    return recipeFolderContents.find(file => lowercaseFileEndings.some(ending => file.name.toLowerCase().endsWith(ending.toLowerCase())));
+function findFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile | undefined {
+    return recipeFolderContents.find(file => file.name.match(regexp));
 }
 
 /**
