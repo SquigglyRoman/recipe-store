@@ -112,7 +112,7 @@ async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
-    const metadataFile = await get<GitFileWithContent>(metadataFilePath, true);
+    const metadataFile = await get<GitFileWithContent>(metadataFilePath);
     return decodeToObject<Metadata>(metadataFile.content);
 }
 
@@ -136,12 +136,12 @@ async function uploadFile(file: File, path: string, sha?: string): Promise<void>
     await put(await encodeFile(file), path, sha);
 }
 
-async function get<T>(path: string, cached?: boolean): Promise<T> {
+async function get<T>(path: string, cacheEnabled?: boolean): Promise<T> {
     const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
         path,
-        headers: cached ? {} : noCacheHeader
+        headers: cacheEnabled ? {} : noCacheHeader 
     });
     return response.data;
 }
