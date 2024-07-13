@@ -1,11 +1,11 @@
-import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
-import { toBase64 } from './Base64';
+import { encode } from './Base64';
 import { Metadata } from './models';
-import { uploadNewRecipe } from './recipeApi';
 import PlaceholderImage from './PlaceholderImage';
+import { uploadNewRecipe } from './recipeApi';
 
 type RecipeCardEditProps = {
     show: boolean;
@@ -84,7 +84,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         }
         setThumbnail({
             file,
-            base64: await toBase64(file, 'WITH_TYPE_INFORMATION')
+            base64: await encode(file, 'WITH_TYPE_INFORMATION')
         });
     }
 

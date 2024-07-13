@@ -1,5 +1,5 @@
 import { Octokit } from "octokit";
-import { toBase64 } from "./Base64";
+import { decode, encode } from "./Base64";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
 let octokit: Octokit;
@@ -66,7 +66,7 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
 export async function updateThumbnail(recipe: Recipe, file: File): Promise<void> {
     const path = `${recipe.path}/${file.name}`;
     console.log(`Updating thumbnail ${path}`);
-    const base64Content = await toBase64(file);
+    const base64Content = await encode(file);
 
     const recipeCurrentlyHasNoThumbnail = !recipe.files.previewImage;
     const newFileHasDiffentNameThanCurrentThumbnail = recipe.files.previewImage?.name !== file.name;
@@ -128,7 +128,8 @@ async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> 
         path: metadataFilePath,
         headers: noCacheHeader
     });
-    return JSON.parse(atob(metadataResponse.data.content)) as Metadata;
+    const decoded = decode(metadataResponse.data.content);
+    return JSON.parse(decoded) as Metadata;
 }
 
 function findCriticalFile(recipeFolderContents: RecipeFolderContents[], folder: RecipeFolder, ...fileEndings: string[]): RecipeFolderContents {
@@ -164,11 +165,11 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
 }
 
 async function uploadNewFile(file: File, path: string): Promise<void> {
-    await put(await toBase64(file), path);
+    await put(await encode(file), path);
 }
 
 async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
-    await put(await toBase64(file), path, sha);
+    await put(await encode(file), path, sha);
 }
 
 async function put(base64Content: string, path: string, sha?: string) {
@@ -191,3 +192,5 @@ export async function deleteFile(path: string, sha: string): Promise<void> {
         sha
     });
 }
+
+

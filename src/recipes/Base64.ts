@@ -1,4 +1,7 @@
-export async function toBase64(file: File, option?: 'WITH_TYPE_INFORMATION'): Promise<string> {
+import base64 from "base-64";
+import utf8 from "utf8";
+
+export async function encode(file: File, option?: 'WITH_TYPE_INFORMATION'): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -10,4 +13,10 @@ export async function toBase64(file: File, option?: 'WITH_TYPE_INFORMATION'): Pr
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+export function decode(encoded: string): string {
+    const bytes = base64.decode(encoded);
+    const utf8Decoded = utf8.decode(bytes);
+    return utf8Decoded;
 }

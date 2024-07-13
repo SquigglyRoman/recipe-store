@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
-import { toBase64 } from './Base64';
+import { encode } from './Base64';
 import PlaceholderImage from './PlaceholderImage';
 import { Recipe } from './models';
 import { updateRecipeMetadata, updateRecipeFile, updateThumbnail } from './recipeApi';
@@ -67,7 +67,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
         setNewThumbnail({
             file,
-            base64: await toBase64(file, 'WITH_TYPE_INFORMATION')
+            base64: await encode(file, 'WITH_TYPE_INFORMATION')
         });
     }
 
