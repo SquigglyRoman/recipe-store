@@ -137,7 +137,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mt-3" controlId="formFile">
-                        <Form.Label>New PDF file</Form.Label>
+                        <Form.Label>Recipe file</Form.Label>
                         <Form.Control
                             required
                             type="file"
