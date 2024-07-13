@@ -55,21 +55,12 @@ async function fetchRecipeData(recipeFolderPath: string): Promise<Recipe> {
         metadata,
         files: {
             metadata: {
-                name: metadataGitFile.name,
-                sha: metadataGitFile.sha,
-                path: metadataGitFile.path,
                 url: metadataGitFile.download_url
             },
             recipe: {
-                name: recipeGitFile.name,
-                sha: recipeGitFile.sha,
-                path: recipeGitFile.path,
                 url: recipeGitFile.download_url
             },
             previewImage: thumbnailGitFile ? {
-                name: thumbnailGitFile.name,
-                sha: thumbnailGitFile.sha,
-                path: thumbnailGitFile.path,
                 url: thumbnailGitFile.download_url
             } : undefined
         },

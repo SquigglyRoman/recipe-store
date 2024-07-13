@@ -5,9 +5,6 @@ export interface Metadata {
 }
 
 export interface File {
-    name: string
-    sha: string
-    path: string
     url: string
 }
 
