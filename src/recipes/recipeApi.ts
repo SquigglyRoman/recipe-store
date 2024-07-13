@@ -1,6 +1,7 @@
 import { Octokit } from "octokit";
 import { decode, encodeFile, encodeObject } from "./Base64";
 import { GitFile, GitResource, Metadata, Recipe } from "./models";
+import { upload } from "@testing-library/user-event/dist/upload";
 
 let octokit: Octokit;
 
@@ -27,14 +28,7 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 }
 
 export async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
-    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
-        path: `${recipePath}/metadata.json`,
-        message: "Update metadata",
-        content: encodeObject<Metadata>(metadata),
-        sha: sha
-    });
+    await put(encodeObject<Metadata>(metadata), `${recipePath}/metadata.json`, sha);
 }
 
 export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {
@@ -43,19 +37,19 @@ export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void
     const sha = recipe.files.recipe.sha;
 
     if (recipe.files.recipe.name === file.name) {
-        await updateExistingFile(file, path, sha);
+        await uploadFile(file, path, sha);
         return;
     }
-    await uploadNewFile(file, `${recipe.path}/${file.name}`)
-    await deleteFile(path, sha);
+    await uploadFile(file, `${recipe.path}/${file.name}`)
+    await deleteResource(path, sha);
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
     const recipePath = `recipes/${metadata.name}`;
     
     await uploadMetadata(metadata, recipePath);
-    await uploadNewFile(recipeFile, `${recipePath}/${recipeFile.name}`);
-    thumbnail && await uploadNewFile(thumbnail, `${recipePath}/${thumbnail.name}`);
+    await uploadFile(recipeFile, `${recipePath}/${recipeFile.name}`);
+    thumbnail && await uploadFile(thumbnail, `${recipePath}/${thumbnail.name}`);
 }
 
 export async function updateThumbnail(recipe: Recipe, file: File): Promise<void> {
@@ -70,22 +64,11 @@ export async function updateThumbnail(recipe: Recipe, file: File): Promise<void>
         await put(base64Content, path);
     } else if(newFileHasDiffentNameThanCurrentThumbnail) {
         await put(base64Content, path);
-        await deleteFile(recipe.files.previewImage?.path ?? '', recipe.files.previewImage?.sha ?? '');
+        await deleteResource(recipe.files.previewImage?.path ?? '', recipe.files.previewImage?.sha ?? '');
     } else {
         await put(base64Content, path, recipe.files.previewImage?.sha);
     }
 }
-
-export async function deleteFile(path: string, sha: string): Promise<void> {
-    await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
-        owner,
-        repo,
-        path,
-        message: `Deleted file ${path}`,
-        sha
-    });
-}
-
 
 function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
@@ -165,30 +148,45 @@ async function getAllRecipeFolders(): Promise<GitResource[]> {
     return get('recipes');
 }
 
-async function uploadNewFile(file: File, path: string): Promise<void> {
-    await put(await encodeFile(file), path);
-}
-
-async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
+/**
+ * @param sha optinal, needed if the file already exists 
+ */
+async function uploadFile(file: File, path: string, sha?: string): Promise<void> {
     await put(await encodeFile(file), path, sha);
 }
 
+async function get(path: string, cached?: boolean): Promise<GitResource[]> {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path,
+        headers: cached ? {} : noCacheHeader
+    });
+    return response.data;
+}
+
+/**
+ * @param sha optinal, needed if the file already exists 
+ */
 async function put(base64Content: string, path: string, sha?: string) {
+    console.log(`Uploading ${path}`);
     await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
         path,
-        message: `Updated file ${path}`,
+        message: `Uploaded ${path}`,
         content: base64Content,
         sha
     });
 }
 
-async function get(path: string): Promise<GitResource[]> {
-    const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+export async function deleteResource(path: string, sha: string): Promise<void> {
+    console.log(`Deleting ${path}`);
+    await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
-        path
+        path,
+        message: `Deleted ${path}`,
+        sha
     });
-    return response.data;
 }
