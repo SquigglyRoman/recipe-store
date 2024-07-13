@@ -23,7 +23,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
     const [newRecipeName, setNewRecipeName] = useState(recipe.metadata.name);
     const [newTags, setNewTags] = useState<string>(recipe.metadata.tags.join(', '));
     const [newRecipeFile, setNewRecipeFile] = useState<File | undefined>(undefined);
-    const currentThumbnail: string = recipe.files.previewImage?.url ?? PlaceholderImage;
+    const currentThumbnail: string = recipe.thumbnailUrl ?? PlaceholderImage;
     const [newThumbnail, setNewThumbnail] = useState<Thumbnail>();
     const [error, setError] = useState<string>('');
 

@@ -14,7 +14,7 @@ interface RecipeCardViewProps {
 const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) => {
 
     const openRecipe = () => {
-        window.open(recipe.files.recipe.url, '_blank');
+        window.open(recipe.recipeFileUrl, '_blank');
     };
 
     return (
@@ -23,7 +23,7 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onClickEdit }) 
             style={{ cursor: 'pointer' }}
             onClick={openRecipe}
         >
-            <Card.Img className="object-fit-cover" variant="top" style={{ minHeight: '40%', maxHeight: '40%' }} src={recipe.files.previewImage?.url ?? PlaceholderImage} />
+            <Card.Img className="object-fit-cover" variant="top" style={{ minHeight: '40%', maxHeight: '40%' }} src={recipe.thumbnailUrl ?? PlaceholderImage} />
             <Card.Body className="d-flex flex-column">
                 <Card.Title>
                     <span>{recipe.metadata.name}</span>

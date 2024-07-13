@@ -4,20 +4,11 @@ export interface Metadata {
     url?: string
 }
 
-export interface File {
-    url: string
-}
-
-export interface Files {
-    metadata: File
-    recipe: File
-    previewImage?: File
-}
-
 export interface Recipe {
     metadata: Metadata
     path: string
-    files: Files
+    recipeFileUrl: string
+    thumbnailUrl?: string
 }
 
 export interface GitResource {
