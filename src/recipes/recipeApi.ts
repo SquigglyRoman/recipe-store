@@ -35,16 +35,6 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
     newThumbnail && await replaceFile(recipeRootPath, newThumbnail, currentThumbnail);
 }
 
-async function uploadMetadata(newMetadata: Metadata, recipePath: string, currentMetadata?: GitFile): Promise<void> {
-    const path = `${recipePath}/metadata.json`;
-    await put(encodeObject<Metadata>(newMetadata), path, currentMetadata?.sha);
-}
-
-async function replaceFile(recipeRootPath: string, file: File, currentFile?: GitFile): Promise<void> {
-    currentFile && await deleteGitFile(currentFile);
-    await uploadFile(file, `${recipeRootPath}/${file.name}`);
-}
-
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
     const recipeRootPath = `${recipesRootPath}/${metadata.name}`;
 
@@ -112,6 +102,16 @@ function findCriticalFile(recipeFolderContents: GitFile[], regexp: RegExp): GitF
 
 function findFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile | undefined {
     return recipeFolderContents.find(file => file.name.match(regexp));
+}
+
+async function uploadMetadata(newMetadata: Metadata, recipePath: string, currentMetadata?: GitFile): Promise<void> {
+    const path = `${recipePath}/metadata.json`;
+    await put(encodeObject<Metadata>(newMetadata), path, currentMetadata?.sha);
+}
+
+async function replaceFile(recipeRootPath: string, file: File, currentFile?: GitFile): Promise<void> {
+    currentFile && await deleteGitFile(currentFile);
+    await uploadFile(file, `${recipeRootPath}/${file.name}`);
 }
 
 /**
