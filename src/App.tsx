@@ -48,7 +48,7 @@ function App() {
         <Spinner animation="border" />
       ) : isAuthorized ? (
         <div className="d-flex flex-column gap-4">
-          <div className="d-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             <Search setSearchTokens={setSearchTokens} />
             <AddRecipe />
           </div>
