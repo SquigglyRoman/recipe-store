@@ -20,8 +20,8 @@ const RecipeCardView: React.FC<RecipeCardViewProps> = ({ recipe, onEditClicked, 
 
     return (
         <Card
-            className="d-flex col-5 col-sm-4 col-md-3 col-lg-2"
-            style={{ cursor: 'pointer' }}
+            className="d-flex"
+            style={{ width: '14rem', cursor: 'pointer' }}
             onClick={openRecipe}
         >
             <Card.Img className="object-fit-cover" variant="top" style={{ minHeight: '40%', maxHeight: '40%' }} src={recipe.thumbnailUrl ?? PlaceholderImage} />
