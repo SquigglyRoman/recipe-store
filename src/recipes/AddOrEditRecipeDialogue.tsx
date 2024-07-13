@@ -99,10 +99,10 @@ const AddOrEditRecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, r
             </Modal.Header>
             <Modal.Body>
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Group controlId="formImage" className='w-50' >
+                    <Form.Group controlId="formImage" >
                         <Form.Label>Thumbnail</Form.Label>
-                        <div className="d-flex flex-column">
-                            <img src={selectedThumbnail?.base64 ?? PlaceholderImage} alt="Recipe" className="img-fluid rounded mb-2" />
+                        <div className="d-flex flex-column col-7" >
+                            <img className="img-fluid rounded mb-2" src={selectedThumbnail?.base64 ?? PlaceholderImage} alt="Recipe thumbnail" />
                             <Button variant="outline-primary" onClick={() => thumbnailInputRef.current?.click()}>Select image</Button>
                         </div>
                         <Form.Control
