@@ -30,18 +30,6 @@ export async function updateRecipeMetadata(recipe: Recipe): Promise<void> {
     uploadMetadata(recipe.metadata, recipe.files.metadata.path, recipe.files.metadata.sha);
 }
 
-async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
-    const metadataContent = JSON.stringify(metadata);
-    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
-        path: `${recipePath}/metadata.json`,
-        message: "Update metadata",
-        content: btoa(metadataContent),
-        sha: sha
-    });
-}
-
 export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {
     console.log(`Uploading recipe file ${file.name} to ${recipe.path}`);
     const path = recipe.files.recipe.path;
@@ -81,8 +69,31 @@ export async function updateThumbnail(recipe: Recipe, file: File): Promise<void>
     }
 }
 
+export async function deleteFile(path: string, sha: string): Promise<void> {
+    await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+        owner,
+        repo,
+        path,
+        message: `Deleted file ${path}`,
+        sha
+    });
+}
+
+
 function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
+}
+
+async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
+    const metadataContent = JSON.stringify(metadata);
+    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: `${recipePath}/metadata.json`,
+        message: "Update metadata",
+        content: btoa(metadataContent),
+        sha: sha
+    });
 }
 
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
@@ -182,15 +193,3 @@ async function put(base64Content: string, path: string, sha?: string) {
         sha
     });
 }
-
-export async function deleteFile(path: string, sha: string): Promise<void> {
-    await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
-        owner,
-        repo,
-        path,
-        message: `Deleted file ${path}`,
-        sha
-    });
-}
-
-
