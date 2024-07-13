@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
-import { encode } from './Base64';
+import { encodeFile } from './Base64';
 import PlaceholderImage from './PlaceholderImage';
 import { Recipe } from './models';
-import { updateRecipeMetadata, updateRecipeFile, updateThumbnail } from './recipeApi';
+import { updateRecipeFile, updateThumbnail, uploadMetadata } from './recipeApi';
 
 type RecipeCardEditProps = {
     recipe: Recipe;
@@ -42,7 +42,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
 
         try {
-            await updateRecipeMetadata(newRecipe);
+            await uploadMetadata(newRecipe.metadata, newRecipe.path, newRecipe.files.metadata.sha);
             newRecipeFile && await updateRecipeFile(recipe, newRecipeFile);
             newThumbnail && await updateThumbnail(recipe, newThumbnail.file);
         } catch (error) {
@@ -67,7 +67,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
         setNewThumbnail({
             file,
-            base64: await encode(file, 'WITH_TYPE_INFORMATION')
+            base64: await encodeFile(file, 'WITH_TYPE_INFORMATION')
         });
     }
 

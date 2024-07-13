@@ -1,7 +1,13 @@
 import base64 from "base-64";
 import utf8 from "utf8";
 
-export async function encode(file: File, option?: 'WITH_TYPE_INFORMATION'): Promise<string> {
+export function encodeObject<T>(object: T): string {
+    const stringified = JSON.stringify(object);
+    const encoded = base64.encode(stringified);
+    return encoded;
+}
+
+export async function encodeFile(file: File, option?: 'WITH_TYPE_INFORMATION'): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {

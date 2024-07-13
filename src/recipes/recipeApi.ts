@@ -1,5 +1,5 @@
 import { Octokit } from "octokit";
-import { decode, encode } from "./Base64";
+import { decode, encodeFile, encodeObject } from "./Base64";
 import { Metadata, Recipe, RecipeFolder, RecipeFolderContents } from "./models";
 
 let octokit: Octokit;
@@ -26,8 +26,15 @@ export async function getAllRecipes(): Promise<Recipe[]> {
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
 
-export async function updateRecipeMetadata(recipe: Recipe): Promise<void> {
-    uploadMetadata(recipe.metadata, recipe.files.metadata.path, recipe.files.metadata.sha);
+export async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
+    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: "SquigglyRoman",
+        repo: "recipe-store",
+        path: `${recipePath}/metadata.json`,
+        message: "Update metadata",
+        content: encodeObject<Metadata>(metadata),
+        sha: sha
+    });
 }
 
 export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {
@@ -54,7 +61,7 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
 export async function updateThumbnail(recipe: Recipe, file: File): Promise<void> {
     const path = `${recipe.path}/${file.name}`;
     console.log(`Updating thumbnail ${path}`);
-    const base64Content = await encode(file);
+    const base64Content = await encodeFile(file);
 
     const recipeCurrentlyHasNoThumbnail = !recipe.files.previewImage;
     const newFileHasDiffentNameThanCurrentThumbnail = recipe.files.previewImage?.name !== file.name;
@@ -82,18 +89,6 @@ export async function deleteFile(path: string, sha: string): Promise<void> {
 
 function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
-}
-
-async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
-    const metadataContent = JSON.stringify(metadata);
-    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-        owner: "SquigglyRoman",
-        repo: "recipe-store",
-        path: `${recipePath}/metadata.json`,
-        message: "Update metadata",
-        content: btoa(metadataContent),
-        sha: sha
-    });
 }
 
 async function fetchRecipeData(folder: RecipeFolder): Promise<Recipe> {
@@ -176,11 +171,11 @@ async function getAllRecipeFolders(): Promise<RecipeFolder[]> {
 }
 
 async function uploadNewFile(file: File, path: string): Promise<void> {
-    await put(await encode(file), path);
+    await put(await encodeFile(file), path);
 }
 
 async function updateExistingFile(file: File, path: string, sha: string): Promise<void> {
-    await put(await encode(file), path, sha);
+    await put(await encodeFile(file), path, sha);
 }
 
 async function put(base64Content: string, path: string, sha?: string) {
