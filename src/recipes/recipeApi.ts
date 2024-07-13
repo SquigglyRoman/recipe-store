@@ -1,5 +1,5 @@
 import { Octokit } from "octokit";
-import { decode, decodeToObject, encodeFile, encodeObject } from "./Base64";
+import { decodeToObject, encodeFile, encodeObject } from "./Base64";
 import { GitFile, GitFileWithContent, GitResource, Metadata, Recipe } from "./models";
 
 let octokit: Octokit;
