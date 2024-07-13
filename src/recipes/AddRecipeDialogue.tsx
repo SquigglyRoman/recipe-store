@@ -65,8 +65,6 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ show, onHide }) => {
         return form.checkValidity();
     }
 
-
-
     function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>): void {
         const file = event.target.files?.[0];
         if (file) {
