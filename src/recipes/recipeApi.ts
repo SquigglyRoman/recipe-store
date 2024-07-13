@@ -27,8 +27,10 @@ export async function getAllRecipes(): Promise<Recipe[]> {
     return Promise.all(recipeFolders.map(fetchRecipeData));
 }
 
-export async function uploadMetadata(metadata: Metadata, recipePath: string, sha?: string): Promise<void> {
-    await put(encodeObject<Metadata>(metadata), `${recipePath}/metadata.json`, sha);
+export async function uploadMetadata(metadata: Metadata, recipePath: string): Promise<void> {
+    const path = `${recipePath}/metadata.json`;
+    const metadataFromGit = await get<GitFile>(path);
+    await put(encodeObject<Metadata>(metadata), path, metadataFromGit.sha);
 }
 
 export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void> {

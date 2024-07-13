@@ -42,7 +42,7 @@ const RecipeCardEdit: React.FC<RecipeCardEditProps> = ({ recipe, show, onHide })
         }
 
         try {
-            await uploadMetadata(newRecipe.metadata, newRecipe.path, newRecipe.files.metadata.sha);
+            await uploadMetadata(newRecipe.metadata, newRecipe.path);
             newRecipeFile && await updateRecipeFile(recipe, newRecipeFile);
             newThumbnail && await updateThumbnail(recipe, newThumbnail.file);
         } catch (error) {
