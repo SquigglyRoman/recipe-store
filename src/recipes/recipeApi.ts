@@ -24,7 +24,7 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
 
 export async function getAllRecipes(): Promise<Recipe[]> {
     const recipeFolders = await get<GitResource[]>(recipesRootPath);
-    return Promise.all(recipeFolders.map(fetchRecipeData));
+    return Promise.all(recipeFolders.map(folder => folder.path).map(fetchRecipeData));
 }
 
 export async function uploadMetadata(metadata: Metadata, recipePath: string): Promise<void> {
@@ -48,7 +48,7 @@ export async function updateRecipeFile(recipe: Recipe, file: File): Promise<void
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
     const recipePath = `${recipesRootPath}/${metadata.name}`;
-    
+
     await uploadMetadata(metadata, recipePath);
     await uploadFile(recipeFile, `${recipePath}/${recipeFile.name}`);
     thumbnail && await uploadFile(thumbnail, `${recipePath}/${thumbnail.name}`);
@@ -62,9 +62,9 @@ export async function updateThumbnail(recipe: Recipe, file: File): Promise<void>
     const recipeCurrentlyHasNoThumbnail = !recipe.files.previewImage;
     const newFileHasDiffentNameThanCurrentThumbnail = recipe.files.previewImage?.name !== file.name;
 
-    if(recipeCurrentlyHasNoThumbnail) {
+    if (recipeCurrentlyHasNoThumbnail) {
         await put(base64Content, path);
-    } else if(newFileHasDiffentNameThanCurrentThumbnail) {
+    } else if (newFileHasDiffentNameThanCurrentThumbnail) {
         await put(base64Content, path);
         await deleteResource(recipe.files.previewImage?.path ?? '', recipe.files.previewImage?.sha ?? '');
     } else {
@@ -76,14 +76,9 @@ function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
 }
 
-async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
-    const recipeFolderContents = await get<GitFile[]>(folder.path);
-
-    const metadataFile = findCriticalFile(recipeFolderContents, /metadata\.json/);
+async function fetchRecipeData(recipeFolderPath: string): Promise<Recipe> {
+    const { metadataFile, recipeFile, imageFile } = await fetchRecipeFiles(recipeFolderPath);
     const metadata = await fetchMetadataObject(metadataFile.path);
-
-    const recipeFile = findCriticalFile(recipeFolderContents, /recipe\.pdf/)
-    const imageFile = findFile(recipeFolderContents, /thumbnail\.(jpg|jpeg|png|webp)/i)
 
     return {
         metadata,
@@ -107,8 +102,18 @@ async function fetchRecipeData(folder: GitResource): Promise<Recipe> {
                 url: imageFile.download_url
             } : undefined
         },
-        path: folder.path
+        path: recipeFolderPath
     };
+
+}
+
+async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadataFile: GitFile, recipeFile: GitFile, imageFile?: GitFile }> {
+    const recipeFolderContents = await get<GitFile[]>(recipeRootPath);
+
+    const metadataFile = findCriticalFile(recipeFolderContents, /metadata\.json/);
+    const recipeFile = findCriticalFile(recipeFolderContents, /recipe\.pdf/);
+    const imageFile = findFile(recipeFolderContents, /thumbnail\.(jpg|jpeg|png|webp)/i);
+    return { metadataFile, recipeFile, imageFile };
 }
 
 async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
@@ -140,7 +145,7 @@ async function get<T>(path: string, cacheEnabled?: boolean): Promise<T> {
         owner,
         repo,
         path,
-        headers: cacheEnabled ? {} : noCacheHeader 
+        headers: cacheEnabled ? {} : noCacheHeader
     });
     return response.data;
 }
