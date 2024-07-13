@@ -41,7 +41,7 @@ const DeleteRecipeDialogue: React.FC<DeleteRecipeDialogueProps> = ({ show, onHid
                     Cancel
                 </Button>
                 <Button variant="danger" onClick={handleDelete}>
-                    {isDeleting ? 'Delete' : 'Deleting...'}
+                    {isDeleting ? 'Deleting...' : 'Delete'}
                     {isDeleting && <Spinner animation="border" />}
                 </Button>
             </Modal.Footer>
