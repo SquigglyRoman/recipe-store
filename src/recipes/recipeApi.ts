@@ -136,11 +136,11 @@ async function put(base64Content: string, path: string, sha?: string) {
     });
 }
 
-export async function deleteGitFile(file: GitFile): Promise<void> {
+async function deleteGitFile(file: GitFile): Promise<void> {
     await deleteResource(file.path, file.sha);
 }
 
-export async function deleteResource(path: string, sha: string): Promise<void> {
+async function deleteResource(path: string, sha: string): Promise<void> {
     console.log(`Deleting ${path}`);
     await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
         owner,
