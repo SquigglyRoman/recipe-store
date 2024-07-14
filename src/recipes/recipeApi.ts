@@ -4,9 +4,6 @@ import { GitFile, GitFileWithContent, GitResource, Metadata, Recipe } from "./mo
 
 let octokit: Octokit;
 
-const noCacheHeader: Record<string, string> = {
-    'If-None-Match': ''
-};
 
 const owner = "SquigglyRoman";
 const repo = "recipe-store";
@@ -45,7 +42,7 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
 
 export async function deleteRecipe(recipeRootPath: string): Promise<void> {
     const { metadata, recipeFile, thumbnail } = await fetchRecipeFiles(recipeRootPath);
-    
+
     await deleteResource(metadata.path, metadata.sha);
     await deleteResource(recipeFile.path, recipeFile.sha);
     thumbnail && await deleteResource(thumbnail.path, thumbnail.sha);
@@ -116,7 +113,9 @@ async function get<T>(path: string, cacheEnabled?: boolean): Promise<T> {
         owner,
         repo,
         path,
-        headers: cacheEnabled ? {} : noCacheHeader
+        headers: cacheEnabled ? {} : {
+            'If-None-Match': ''
+        }
     });
     return response.data;
 }
