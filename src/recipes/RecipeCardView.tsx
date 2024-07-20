@@ -2,7 +2,7 @@ import React from 'react';
 import Card from 'react-bootstrap/Card';
 import Tags from '../tags/Tags';
 import { Recipe } from './models';
-import PlaceholderImage from './PlaceholderImage';
+import PlaceholderImage from '../resources/PlaceholderImage';
 import RecipeActions from './RecipeActions';
 
 interface RecipeCardViewProps {

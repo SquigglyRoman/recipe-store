@@ -4,7 +4,7 @@ import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import { encodeFile } from './Base64';
 import { Metadata, Recipe } from './models';
-import PlaceholderImage from './PlaceholderImage';
+import PlaceholderImage from '../resources/PlaceholderImage';
 
 
 type RecipeCardEditProps = {

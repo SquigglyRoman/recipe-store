@@ -1,5 +1,5 @@
 # recipe-store
-![recipe-store logo](./docs/logo%20bigpng.png)
+![recipe-store logo](./src/resources/LogoBig.png)
 
 Use a github repository to store and search recipes.
 

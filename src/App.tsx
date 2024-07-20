@@ -11,6 +11,7 @@ import { Spinner } from 'react-bootstrap';
 import eventBus from './events/EventBus';
 import { EventType } from './events/Events';
 import AddRecipe from './recipes/AddRecipe';
+import RecipeStoreLogo from './resources/Logo';
 
 function App() {
 
@@ -49,6 +50,7 @@ function App() {
       ) : isAuthorized ? (
         <div className="d-flex flex-column gap-4">
           <div className="d-flex flex-wrap gap-2">
+            <RecipeStoreLogo />
             <Search setSearchTokens={setSearchTokens} />
             <AddRecipe />
           </div>
