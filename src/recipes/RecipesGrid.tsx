@@ -7,7 +7,6 @@ interface Props {
     recipes: Recipe[]
     searchTokens: string[]
     selectedTags: string[]
-    onUpdate: () => void
 }
 
 const RecipesGrid: React.FC<Props> = ({ recipes, searchTokens, selectedTags }) => {
