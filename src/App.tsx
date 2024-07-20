@@ -55,7 +55,7 @@ function App() {
             <AddRecipe />
           </div>
           <PopularTags recipes={recipes} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
-          <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} onUpdate={loadRecipes} />
+          <RecipesGrid searchTokens={searchTokens} selectedTags={selectedTags} recipes={recipes} />
         </div>
       ) : (
         <Login onLoginSuccess={handleIsAuthorized} />
