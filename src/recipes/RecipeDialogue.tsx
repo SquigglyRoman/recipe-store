@@ -16,10 +16,6 @@ type RecipeCardEditProps = {
     currentRecipe?: Recipe
 }
 
-type Thumbnail = {
-    file: File,
-    base64: string
-}
 
 const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSave, currentRecipe }) => {
     const [validated, setValidated] = useState(false);
@@ -28,7 +24,9 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
     const [recipeName, setRecipeName] = useState<string>(currentRecipe?.metadata.name ?? '');
     const [tags, setTags] = useState<string>(currentRecipe?.metadata.tags.join(', ') ?? '');
     const [selectedRecipeFile, setSelectedRecipeFile] = useState<File>();
-    const [selectedThumbnail, setSelectedThumbnail] = useState<Thumbnail>();
+    const [selectedThumbnail, setSelectedThumbnail] = useState<File>();
+
+    const [displayedThumbnail, setDisplayedThumbnail] = useState<string>(currentRecipe?.thumbnailUrl ?? PlaceholderImage);
     const [error, setError] = useState<string>('');
 
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +49,7 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
         }
 
         try {
-            await onSave(metadata, selectedRecipeFile, selectedThumbnail?.file);
+            await onSave(metadata, selectedRecipeFile, selectedThumbnail);
             eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, {});
         } catch (error) {
             setError('Something went wrong, please try again later.');
@@ -75,13 +73,11 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
 
     async function handleThumbnailSelected(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
         const file = event.target.files?.[0];
-        if (!file) {
-            return;
+        if(!file) {
+            return
         }
-        setSelectedThumbnail({
-            file,
-            base64: await encodeFile(file, 'WITH_TYPE_INFORMATION')
-        });
+        setSelectedThumbnail(file);
+        setDisplayedThumbnail(await encodeFile(file, 'WITH_TYPE_INFORMATION'));
     }
 
     return (
@@ -102,7 +98,7 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
                     <Form.Group controlId="formImage" >
                         <Form.Label>Thumbnail</Form.Label>
                         <div className="d-flex flex-column col-7 col-xl-4" >
-                            <img className="img-fluid rounded mb-2" src={selectedThumbnail?.base64 ?? PlaceholderImage} alt="Recipe thumbnail" />
+                            <img className="img-fluid rounded mb-2" src={displayedThumbnail} alt="Recipe thumbnail" />
                             <Button variant="outline-primary" onClick={() => thumbnailInputRef.current?.click()}>Select image</Button>
                         </div>
                         <Form.Control
