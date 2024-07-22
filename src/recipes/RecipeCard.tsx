@@ -1,5 +1,5 @@
 import React from 'react';
-import AddOrEditRecipeDialogue from './AddOrEditRecipeDialogue';
+import RecipeDialogue from './RecipeDialogue';
 import DeleteRecipeDialogue from './DeleteRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
 import { Metadata, Recipe } from './models';
@@ -28,7 +28,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     return (
         <>
             <RecipeCardView recipe={recipe} onEditClicked={onEditClicked} onDeleteClicked={onDeleteClicked} />
-            {showEdit && <AddOrEditRecipeDialogue
+            {showEdit && <RecipeDialogue
                 title={"Edit recipe"}
                 currentRecipe={recipe}
                 show={showEdit}

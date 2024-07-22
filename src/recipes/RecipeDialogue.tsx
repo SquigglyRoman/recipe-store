@@ -21,7 +21,7 @@ type Thumbnail = {
     base64: string
 }
 
-const AddOrEditRecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSave, currentRecipe }) => {
+const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSave, currentRecipe }) => {
     const [validated, setValidated] = useState(false);
 
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -168,4 +168,4 @@ const AddOrEditRecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, r
     );
 };
 
-export default AddOrEditRecipeDialogue;
+export default RecipeDialogue;

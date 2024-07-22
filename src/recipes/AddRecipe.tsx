@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import { BsPlus } from 'react-icons/bs';
 import { Metadata } from './models';
 import { uploadNewRecipe } from './recipeApi';
-import AddOrEditRecipeDialogue from './AddOrEditRecipeDialogue';
+import RecipeDialogue from './RecipeDialogue';
 
 const AddRecipe: React.FC = () => {
     const [showDialogue, setShowDialogue] = useState(false);
@@ -21,7 +21,7 @@ const AddRecipe: React.FC = () => {
                 Add Recipe
                 <BsPlus />
             </Button>
-            <AddOrEditRecipeDialogue
+            <RecipeDialogue
                 title={'Add new recipe'}
                 show={showDialogue}
                 onHide={() => setShowDialogue(false)}
