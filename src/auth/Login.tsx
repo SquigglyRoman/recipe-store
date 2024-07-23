@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import React, { useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { checkTokenValidity } from '../recipes/recipeApi';

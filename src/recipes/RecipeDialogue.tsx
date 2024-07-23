@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
+import PlaceholderImage from '../resources/PlaceholderImage';
 import { encodeFile } from './Base64';
 import { Metadata, Recipe } from './models';
-import PlaceholderImage from '../resources/PlaceholderImage';
 
 
 type RecipeCardEditProps = {

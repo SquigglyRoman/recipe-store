@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import eventBus from '../events/EventBus';
+import { EventType, RecipesLoadedEvent } from '../events/Events';
 import { Recipe } from '../recipes/models';
 import Tags from './Tags';
 
 interface PopularTagsProps {
-    recipes: Recipe[]
     selectedTags: string[]
     setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-const PopularTags: React.FC<PopularTagsProps> = ({ recipes, selectedTags, setSelectedTags }) => {
+const PopularTags: React.FC<PopularTagsProps> = ({ selectedTags, setSelectedTags }) => {
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
     const allTagNames: string[] = [];
+
+    useEffect(() => {
+        eventBus.subscribe<EventType.RECIPES_LOADED>(EventType.RECIPES_LOADED, (args: RecipesLoadedEvent) => {
+            setRecipes(args.recipes);
+        });
+    }, []);
 
     recipes.forEach(recipe => {
         recipe.metadata.tags.forEach(tag => {
