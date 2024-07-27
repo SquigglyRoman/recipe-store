@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { Row, Spinner } from 'react-bootstrap';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
 import RecipeCard from './RecipeCard';
@@ -32,7 +32,10 @@ const RecipesGrid: React.FC<Props> = ({ searchTokens, selectedTags }) => {
     return (
         <>
             {isLoading ?
-                (<Spinner animation="border" />) :
+                (<div className='d-flex flex-row gap-3'>
+                    Loading recipes...
+                    <Spinner animation="border" />
+                </div>) :
                 (<div className="d-flex gap-3 flex-wrap">
                     {recipes
                         .filter(recipe => matches(recipe.metadata, searchTokens, selectedTags))
