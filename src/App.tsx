@@ -10,7 +10,6 @@ import PopularTags from './tags/PopularTags';
 
 function App() {
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   
   const [searchTokens, setSearchTokens] = useState<string[]>([]);
@@ -19,7 +18,6 @@ function App() {
   useEffect(() => {
     checkIfAuthorizedFromCookie().then(isAuthorized => {
       isAuthorized && handleIsAuthorized();
-      setIsLoading(false);
     });
 
   }, []);
@@ -27,7 +25,6 @@ function App() {
   async function handleIsAuthorized() {
     setIsAuthorized(true);
   }
-
 
   return (
     <>
