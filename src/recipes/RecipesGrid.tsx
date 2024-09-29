@@ -36,14 +36,14 @@ const RecipesGrid: React.FC<Props> = ({ searchTokens, selectedTags }) => {
                     Loading recipes...
                     <Spinner animation="border" />
                 </div>) :
-                (<div className="d-flex gap-3 flex-wrap">
+                (<Row>
                     {recipes
                         .filter(recipe => matches(recipe.metadata, searchTokens, selectedTags))
                         .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
                         .map(recipe => (
                             <RecipeCard key={recipe.metadata.name} recipe={recipe} />
                         ))}
-                </div >)}
+                </Row >)}
         </>
     );
 };

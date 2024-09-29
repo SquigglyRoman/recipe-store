@@ -4,6 +4,7 @@ import DeleteRecipeDialogue from './DeleteRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
 import { Metadata, Recipe } from './models';
 import { updateRecipe } from './recipeApi';
+import { Col, Row } from 'react-bootstrap';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -26,7 +27,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     }
 
     return (
-        <>
+        <Col xs={6} sm={4} md={3} xl={2} className="d-flex justify-content-xs-center mb-4">
             <RecipeCardView recipe={recipe} onEditClicked={onEditClicked} onDeleteClicked={onDeleteClicked} />
             {showEdit && <RecipeDialogue
                 title={"Edit recipe"}
@@ -40,7 +41,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                 recipe={recipe}
                 onHide={() => setShowDelete(false)}
             />}
-        </>
+        </Col>
     );
 };
 
