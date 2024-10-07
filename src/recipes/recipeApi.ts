@@ -7,6 +7,7 @@ let octokit: Octokit;
 const owner = "SquigglyRoman";
 const repo = "recipe-store";
 const recipesRootFolder = "recipes";
+const repoRootUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master`;
 
 export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
@@ -25,6 +26,16 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 
 export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata, newRecipeFile?: File, newThumbnail?: File): Promise<void> {
     const { metadata: currentMetadata, recipeFile: currentRecipeFile, thumbnail: currentThumbnail } = await fetchRecipeFiles(recipeRootPath);
+    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
+    const recipes = decodeToObject<Recipe[]>(recipesList.content);
+    const recipe = recipes.find(recipe => recipe.path === recipeRootPath);
+    if (!recipe) {
+        throw new Error(`No recipe found at ${recipeRootPath}`);
+    }
+    recipe.metadata = newMetadata;
+    newRecipeFile && (recipe.recipeFileUrl = `${repoRootUrl}/${recipeRootPath}/${newRecipeFile.name}`);
+    newThumbnail && (recipe.thumbnailUrl = `${repoRootUrl}/${recipeRootPath}/${newThumbnail.name}`);
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, recipesList.sha);
 
     await uploadMetadata(newMetadata, recipeRootPath, currentMetadata);
     newRecipeFile && await replaceFile(recipeRootPath, newRecipeFile, currentRecipeFile);
@@ -33,7 +44,7 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
     const newRecipeRootFolder = `${recipesRootFolder}/${metadata.name}`;
-    const newRecipeRootUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/recipes/${newRecipeRootFolder}`;
+    const newRecipeRootUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/${newRecipeRootFolder}`;
     const newRecipe: Recipe = {
         metadata, 
         path: newRecipeRootFolder,
