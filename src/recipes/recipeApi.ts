@@ -6,7 +6,7 @@ let octokit: Octokit;
 
 const owner = "SquigglyRoman";
 const repo = "recipe-store";
-const recipesRootPath = "recipes";
+const recipesRootFolder = "recipes";
 
 export async function checkTokenValidity(apiToken: string): Promise<boolean> {
     initApi(apiToken);
@@ -19,7 +19,7 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
-    const recipesList = await get<GitFileWithContent>(`${recipesRootPath}/recipes.json`);
+    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
     return decodeToObject<Recipe[]>(recipesList.content);
 }
 
@@ -32,11 +32,26 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
-    const recipeRootPath = `${recipesRootPath}/${metadata.name}`;
+    const newRecipeRootFolder = `${recipesRootFolder}/${metadata.name}`;
+    const newRecipeRootUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/recipes/${newRecipeRootFolder}`;
+    const newRecipe: Recipe = {
+        metadata, 
+        path: newRecipeRootFolder,
+        recipeFileUrl: `${newRecipeRootUrl}/${recipeFile.name}`,
+        thumbnailUrl: thumbnail && `${newRecipeRootUrl}/${thumbnail.name}`
+    }
+    addRecipeToRecipesList(newRecipe);
 
-    await uploadMetadata(metadata, recipeRootPath);
-    await uploadFile(recipeFile, `${recipeRootPath}/${recipeFile.name}`);
-    thumbnail && await uploadFile(thumbnail, `${recipeRootPath}/${thumbnail.name}`);
+    await uploadMetadata(metadata, newRecipeRootFolder);
+    await uploadFile(recipeFile, `${newRecipeRootFolder}/${recipeFile.name}`);
+    thumbnail && await uploadFile(thumbnail, `${newRecipeRootFolder}/${thumbnail.name}`);
+}
+
+async function addRecipeToRecipesList(recipe: Recipe): Promise<void> {
+    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
+    const recipes = decodeToObject<Recipe[]>(recipesList.content);
+    recipes.push(recipe);
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, recipesList.sha);
 }
 
 export async function deleteRecipe(recipeRootPath: string): Promise<void> {
