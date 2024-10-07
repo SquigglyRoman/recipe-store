@@ -1,7 +1,6 @@
 import { Octokit } from "octokit";
 import { decodeToObject, encodeFile, encodeObject } from "./Base64";
-import { GitFile, GitFileWithContent, GitResource, Metadata, Recipe } from "./models";
-
+import { GitFile, GitFileWithContent, Metadata, Recipe } from "./models";
 let octokit: Octokit;
 
 
@@ -20,8 +19,8 @@ export async function checkTokenValidity(apiToken: string): Promise<boolean> {
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
-    const recipeFolders = await get<GitResource[]>(recipesRootPath);
-    return Promise.all(recipeFolders.map(folder => folder.path).map(fetchRecipeData));
+    const recipesList = await get<GitFileWithContent>(`${recipesRootPath}/recipes.json`);
+    return decodeToObject<Recipe[]>(recipesList.content);
 }
 
 export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata, newRecipeFile?: File, newThumbnail?: File): Promise<void> {
@@ -52,19 +51,6 @@ function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
 }
 
-async function fetchRecipeData(recipeFolderPath: string): Promise<Recipe> {
-    const { metadata: metadataGitFile, recipeFile: recipeGitFile, thumbnail: thumbnailGitFile } = await fetchRecipeFiles(recipeFolderPath);
-    const metadata = await fetchMetadataObject(metadataGitFile.path);
-
-    return {
-        metadata,
-        recipeFileUrl: recipeGitFile.download_url,
-        thumbnailUrl: thumbnailGitFile?.download_url,
-        path: recipeFolderPath
-    };
-
-}
-
 async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadata: GitFile, recipeFile: GitFile, thumbnail?: GitFile }> {
     const recipeFolderContents = await get<GitFile[]>(recipeRootPath);
 
@@ -72,11 +58,6 @@ async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadata: Git
     const recipeFile = findCriticalFile(recipeFolderContents, /pdf$/i);
     const thumbnail = findFile(recipeFolderContents, /\.(jpg|jpeg|png|webp)$/i);
     return { metadata, recipeFile, thumbnail };
-}
-
-async function fetchMetadataObject(metadataFilePath: string): Promise<Metadata> {
-    const metadataFile = await get<GitFileWithContent>(metadataFilePath);
-    return decodeToObject<Metadata>(metadataFile.content);
 }
 
 function findCriticalFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile {
