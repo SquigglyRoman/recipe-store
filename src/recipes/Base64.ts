@@ -3,7 +3,8 @@ import utf8 from "utf8";
 
 export function encodeObject<T>(object: T): string {
     const stringified = JSON.stringify(object);
-    return base64.encode(stringified);
+    const utf8Encoded = utf8.encode(stringified);
+    return base64.encode(utf8Encoded);
 }
 
 export async function encodeFile(file: File, option?: 'WITH_TYPE_INFORMATION'): Promise<string> {
