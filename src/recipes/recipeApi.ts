@@ -26,8 +26,8 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 
 export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata, newRecipeFile?: File, newThumbnail?: File): Promise<void> {
     const { metadata: currentMetadata, recipeFile: currentRecipeFile, thumbnail: currentThumbnail } = await fetchRecipeFiles(recipeRootPath);
-    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
-    const recipes = decodeToObject<Recipe[]>(recipesList.content);
+    
+    const {recipes, sha} = await getRecipeList();
     const recipe = recipes.find(recipe => recipe.path === recipeRootPath);
     if (!recipe) {
         throw new Error(`No recipe found at ${recipeRootPath}`);
@@ -35,7 +35,7 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
     recipe.metadata = newMetadata;
     newRecipeFile && (recipe.recipeFileUrl = `${repoRootUrl}/${recipeRootPath}/${newRecipeFile.name}`);
     newThumbnail && (recipe.thumbnailUrl = `${repoRootUrl}/${recipeRootPath}/${newThumbnail.name}`);
-    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, recipesList.sha);
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
 
     await uploadMetadata(newMetadata, recipeRootPath, currentMetadata);
     newRecipeFile && await replaceFile(recipeRootPath, newRecipeFile, currentRecipeFile);
@@ -44,9 +44,9 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
     const newRecipeRootFolder = `${recipesRootFolder}/${metadata.name}`;
-    const newRecipeRootUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/${newRecipeRootFolder}`;
+    const newRecipeRootUrl = `${repoRootUrl}/${newRecipeRootFolder}`;
     const newRecipe: Recipe = {
-        metadata, 
+        metadata,
         path: newRecipeRootFolder,
         recipeFileUrl: `${newRecipeRootUrl}/${recipeFile.name}`,
         thumbnailUrl: thumbnail && `${newRecipeRootUrl}/${thumbnail.name}`
@@ -59,10 +59,14 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
 }
 
 async function addRecipeToRecipesList(recipe: Recipe): Promise<void> {
-    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
-    const recipes = decodeToObject<Recipe[]>(recipesList.content);
+    const {recipes, sha} = await getRecipeList();
     recipes.push(recipe);
-    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, recipesList.sha);
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
+}
+
+async function getRecipeList(): Promise<{ recipes: Recipe[]; sha: string }> {
+    const recipesList = await get<GitFileWithContent>(`${recipesRootFolder}/recipes.json`);
+    return { recipes: decodeToObject<Recipe[]>(recipesList.content), sha: recipesList.sha };
 }
 
 export async function deleteRecipe(recipeRootPath: string): Promise<void> {
