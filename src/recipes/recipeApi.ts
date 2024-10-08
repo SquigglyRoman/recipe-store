@@ -72,6 +72,14 @@ async function getRecipeList(): Promise<{ recipes: Recipe[]; sha: string }> {
 export async function deleteRecipe(recipeRootPath: string): Promise<void> {
     const { metadata, recipeFile, thumbnail } = await fetchRecipeFiles(recipeRootPath);
 
+    const {recipes, sha} = await getRecipeList();
+    const recipeIndex = recipes.findIndex(recipe => recipe.path === recipeRootPath);
+    if (recipeIndex === -1) {
+        throw new Error(`No recipe found at ${recipeRootPath}`);
+    }
+    recipes.splice(recipeIndex, 1);
+
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
     await deleteResource(metadata.path, metadata.sha);
     await deleteResource(recipeFile.path, recipeFile.sha);
     thumbnail && await deleteResource(thumbnail.path, thumbnail.sha);
