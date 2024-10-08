@@ -25,7 +25,7 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 }
 
 export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata, newRecipeFile?: File, newThumbnail?: File): Promise<void> {
-    const { metadata: currentMetadata, recipeFile: currentRecipeFile, thumbnail: currentThumbnail } = await fetchRecipeFiles(recipeRootPath);
+    const { recipeFile: currentRecipeFile, thumbnail: currentThumbnail } = await fetchRecipeFiles(recipeRootPath);
     
     const {recipes, sha} = await getRecipeList();
     const recipe = recipes.find(recipe => recipe.path === recipeRootPath);
@@ -37,7 +37,6 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
     newThumbnail && (recipe.thumbnailUrl = `${repoRootUrl}/${recipeRootPath}/${newThumbnail.name}`);
     await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
 
-    await uploadMetadata(newMetadata, recipeRootPath, currentMetadata);
     newRecipeFile && await replaceFile(recipeRootPath, newRecipeFile, currentRecipeFile);
     newThumbnail && await replaceFile(recipeRootPath, newThumbnail, currentThumbnail);
 }
@@ -53,7 +52,6 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
     }
     addRecipeToRecipesList(newRecipe);
 
-    await uploadMetadata(metadata, newRecipeRootFolder);
     await uploadFile(recipeFile, `${newRecipeRootFolder}/${recipeFile.name}`);
     thumbnail && await uploadFile(thumbnail, `${newRecipeRootFolder}/${thumbnail.name}`);
 }
@@ -70,7 +68,7 @@ async function getRecipeList(): Promise<{ recipes: Recipe[]; sha: string }> {
 }
 
 export async function deleteRecipe(recipeRootPath: string): Promise<void> {
-    const { metadata, recipeFile, thumbnail } = await fetchRecipeFiles(recipeRootPath);
+    const { recipeFile, thumbnail } = await fetchRecipeFiles(recipeRootPath);
 
     const {recipes, sha} = await getRecipeList();
     const recipeIndex = recipes.findIndex(recipe => recipe.path === recipeRootPath);
@@ -80,7 +78,6 @@ export async function deleteRecipe(recipeRootPath: string): Promise<void> {
     recipes.splice(recipeIndex, 1);
 
     await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
-    await deleteResource(metadata.path, metadata.sha);
     await deleteResource(recipeFile.path, recipeFile.sha);
     thumbnail && await deleteResource(thumbnail.path, thumbnail.sha);
 }
@@ -89,13 +86,12 @@ function initApi(apiToken: string) {
     octokit = new Octokit({ auth: apiToken });
 }
 
-async function fetchRecipeFiles(recipeRootPath: string): Promise<{ metadata: GitFile, recipeFile: GitFile, thumbnail?: GitFile }> {
+async function fetchRecipeFiles(recipeRootPath: string): Promise<{ recipeFile: GitFile, thumbnail?: GitFile }> {
     const recipeFolderContents = await get<GitFile[]>(recipeRootPath);
 
-    const metadata = findCriticalFile(recipeFolderContents, /metadata\.json/);
     const recipeFile = findCriticalFile(recipeFolderContents, /pdf$/i);
     const thumbnail = findFile(recipeFolderContents, /\.(jpg|jpeg|png|webp)$/i);
-    return { metadata, recipeFile, thumbnail };
+    return { recipeFile, thumbnail };
 }
 
 function findCriticalFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile {
@@ -108,11 +104,6 @@ function findCriticalFile(recipeFolderContents: GitFile[], regexp: RegExp): GitF
 
 function findFile(recipeFolderContents: GitFile[], regexp: RegExp): GitFile | undefined {
     return recipeFolderContents.find(file => file.name.match(regexp));
-}
-
-async function uploadMetadata(newMetadata: Metadata, recipePath: string, currentMetadata?: GitFile): Promise<void> {
-    const path = `${recipePath}/metadata.json`;
-    await put(encodeObject<Metadata>(newMetadata), path, currentMetadata?.sha);
 }
 
 async function replaceFile(recipeRootPath: string, file: File, currentFile?: GitFile): Promise<void> {
