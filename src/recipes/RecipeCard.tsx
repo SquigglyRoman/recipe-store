@@ -22,13 +22,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         setShowDelete(true);
     }
 
-    async function onSave(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
-        try {
-            await updateRecipe(recipe.path, metadata, recipeFile, thumbnail);
-            setShowEdit(false);
-        } catch (error) {
-            console.error("Updating recipe failed", error);
-        }
+    async function onSubmit(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
+        await updateRecipe(recipe.path, metadata, recipeFile, thumbnail);
+    }
+
+    function onSuccess(): void {
+        setShowEdit(false);
     }
 
     return (
@@ -38,7 +37,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                 title={"Edit recipe"}
                 currentRecipe={recipe}
                 show={showEdit}
-                onSave={onSave}
+                onSubmit={onSubmit}
+                onSuccess={onSuccess}
                 onHide={() => setShowEdit(false)} />
             }
             {showDelete && <DeleteRecipeDialogue

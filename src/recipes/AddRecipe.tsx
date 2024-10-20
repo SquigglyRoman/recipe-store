@@ -8,15 +8,14 @@ import RecipeDialogue from './RecipeDialogue';
 const AddRecipe: React.FC = () => {
     const [showDialogue, setShowDialogue] = useState(false);
 
-    async function onSave(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
+    async function onSubmit(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
         if (!recipeFile) {
             return Promise.reject('Recipe file is required');
         }
-        try {
-            await uploadNewRecipe(metadata, recipeFile, thumbnail);
-        } catch (error) {
-            console.error("Uploading recipe file failed");
-        }
+        await uploadNewRecipe(metadata, recipeFile, thumbnail);
+    }
+
+    function onSuccess(): void {
         setShowDialogue(false);
     }
 
@@ -34,7 +33,8 @@ const AddRecipe: React.FC = () => {
                     setShowDialogue(false);
                     console.log("Show dialogue is now: " + showDialogue);
                 }}
-                onSave={onSave}
+                onSubmit={onSubmit}
+                onSuccess={onSuccess}
                 recipeFileIsMandatory />
         </div>
     );

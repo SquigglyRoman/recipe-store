@@ -12,12 +12,13 @@ type RecipeCardEditProps = {
     show: boolean
     recipeFileIsMandatory?: boolean
     onHide: () => void
-    onSave: (metadata: Metadata, recipeFile?: File, thumbnail?: File) => Promise<void>
+    onSubmit: (metadata: Metadata, recipeFile?: File, thumbnail?: File) => Promise<void>
+    onSuccess: () => void
     currentRecipe?: Recipe
 }
 
 
-const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSave, currentRecipe }) => {
+const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFileIsMandatory, onHide, onSubmit, onSuccess, currentRecipe }) => {
     const [validated, setValidated] = useState(false);
 
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -49,9 +50,10 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
         }
 
         try {
-            await onSave(metadata, selectedRecipeFile, selectedThumbnail);
+            await onSubmit(metadata, selectedRecipeFile, selectedThumbnail);
             eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, {});
             resetInputs();
+            onSuccess();
         } catch (error) {
             setError('Something went wrong, please try again later.');
             console.log(error)
