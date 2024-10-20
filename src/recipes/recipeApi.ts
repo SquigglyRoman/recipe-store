@@ -53,7 +53,7 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
 
     await uploadFile(recipeFile, `${newRecipeRootFolder}/${recipeFile.name}`);
     thumbnail && await uploadFile(thumbnail, `${newRecipeRootFolder}/${thumbnail.name}`);
-    addRecipeToRecipesList(newRecipe);
+    await addRecipeToRecipesList(newRecipe);
 }
 
 async function addRecipeToRecipesList(recipe: Recipe): Promise<void> {
