@@ -12,7 +12,12 @@ const AddRecipe: React.FC = () => {
         if (!recipeFile) {
             return Promise.reject('Recipe file is required');
         }
-        await uploadNewRecipe(metadata, recipeFile, thumbnail);
+        try {
+            await uploadNewRecipe(metadata, recipeFile, thumbnail);
+        } catch (error) {
+            console.error("Uploading recipe file failed");
+        }
+        setShowDialogue(false);
     }
 
     return (
@@ -24,7 +29,11 @@ const AddRecipe: React.FC = () => {
             <RecipeDialogue
                 title={'Add new recipe'}
                 show={showDialogue}
-                onHide={() => setShowDialogue(false)}
+                onHide={() => {
+                    console.log("Trying to close dialogue");
+                    setShowDialogue(false);
+                    console.log("Show dialogue is now: " + showDialogue);
+                }}
                 onSave={onSave}
                 recipeFileIsMandatory />
         </div>

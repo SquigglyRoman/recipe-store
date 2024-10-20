@@ -23,7 +23,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     }
 
     async function onSave(metadata: Metadata, recipeFile?: File, thumbnail?: File): Promise<void> {
-        await updateRecipe(recipe.path, metadata, recipeFile, thumbnail);
+        try {
+            await updateRecipe(recipe.path, metadata, recipeFile, thumbnail);
+            setShowEdit(false);
+        } catch (error) {
+            console.error("Updating recipe failed", error);
+        }
     }
 
     return (
