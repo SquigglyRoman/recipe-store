@@ -51,12 +51,20 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
         try {
             await onSave(metadata, selectedRecipeFile, selectedThumbnail);
             eventBus.emit<EventType.RECIPE_UPDATED>(EventType.RECIPE_UPDATED, {});
+            resetInputs();
         } catch (error) {
             setError('Something went wrong, please try again later.');
             console.log(error)
         }
 
         setIsSaving(false);
+    }
+
+    function resetInputs() {
+        setRecipeName('');
+        setTags('');
+        setSelectedRecipeFile(undefined);
+        setSelectedThumbnail(undefined);
     }
 
     function checkFormValidity(event: React.FormEvent<HTMLFormElement>): boolean {
