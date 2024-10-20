@@ -35,10 +35,10 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
     recipe.metadata = newMetadata;
     newRecipeFile && (recipe.recipeFileUrl = `${repoRootUrl}/${recipeRootPath}/${newRecipeFile.name}`);
     newThumbnail && (recipe.thumbnailUrl = `${repoRootUrl}/${recipeRootPath}/${newThumbnail.name}`);
-    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
-
+    
     newRecipeFile && await replaceFile(recipeRootPath, newRecipeFile, currentRecipeFile);
     newThumbnail && await replaceFile(recipeRootPath, newThumbnail, currentThumbnail);
+    await put(encodeObject(recipes), `${recipesRootFolder}/recipes.json`, sha);
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
@@ -50,10 +50,10 @@ export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thum
         recipeFileUrl: `${newRecipeRootUrl}/${recipeFile.name}`,
         thumbnailUrl: thumbnail && `${newRecipeRootUrl}/${thumbnail.name}`
     }
-    addRecipeToRecipesList(newRecipe);
 
     await uploadFile(recipeFile, `${newRecipeRootFolder}/${recipeFile.name}`);
     thumbnail && await uploadFile(thumbnail, `${newRecipeRootFolder}/${thumbnail.name}`);
+    addRecipeToRecipesList(newRecipe);
 }
 
 async function addRecipeToRecipesList(recipe: Recipe): Promise<void> {
