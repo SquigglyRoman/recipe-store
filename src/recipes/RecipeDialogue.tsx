@@ -67,6 +67,7 @@ const RecipeDialogue: React.FC<RecipeCardEditProps> = ({ title, show, recipeFile
         setTags('');
         setSelectedRecipeFile(undefined);
         setSelectedThumbnail(undefined);
+        setDisplayedThumbnail(PlaceholderImage);
     }
 
     function checkFormValidity(event: React.FormEvent<HTMLFormElement>): boolean {
