@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Button, Modal, Spinner } from 'react-bootstrap';
-import { Recipe } from './models';
-import { deleteRecipe } from './recipeApi';
 import eventBus from '../events/EventBus';
 import { EventType } from '../events/Events';
+import { Recipe } from './models';
+import { deleteRecipe } from './recipeApi';
 
 interface DeleteRecipeDialogueProps {
     show: boolean

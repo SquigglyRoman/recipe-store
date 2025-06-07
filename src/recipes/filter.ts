@@ -1,4 +1,4 @@
-import { Metadata, Recipe } from "./models";
+import { Metadata } from "./models";
 
 export function matches(metadata: Metadata, searchTokens: string[], selectedTags: string[]): boolean {
     return isPartiallyMatchedByAnySearchToken(searchTokens, metadata) && isFullyMatchedByAllTags(metadata, selectedTags);

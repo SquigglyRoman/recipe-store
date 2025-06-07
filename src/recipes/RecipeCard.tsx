@@ -1,10 +1,10 @@
 import React from 'react';
-import RecipeDialogue from './RecipeDialogue';
+import { Col } from 'react-bootstrap';
 import DeleteRecipeDialogue from './DeleteRecipeDialogue';
 import RecipeCardView from './RecipeCardView';
+import RecipeDialogue from './RecipeDialogue';
 import { Metadata, Recipe } from './models';
 import { updateRecipe } from './recipeApi';
-import { Col, Row } from 'react-bootstrap';
 
 interface RecipeCardProps {
     recipe: Recipe;
