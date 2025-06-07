@@ -42,7 +42,7 @@ export async function updateRecipe(recipeRootPath: string, newMetadata: Metadata
 }
 
 export async function uploadNewRecipe(metadata: Metadata, recipeFile: File, thumbnail?: File): Promise<void> {
-    const newRecipeRootFolder = `${recipesRootFolder}/${metadata.name}`;
+    const newRecipeRootFolder = `${recipesRootFolder}/${metadata.name.trim()}`;
     const newRecipeRootUrl = `${repoRootUrl}/${newRecipeRootFolder}`;
     const newRecipe: Recipe = {
         metadata,
