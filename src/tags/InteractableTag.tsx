@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Badge } from 'react-bootstrap';
-import { FaTimes } from 'react-icons/fa';
 
 interface InteractableTagProps {
     tagName: string;
@@ -10,11 +9,11 @@ interface InteractableTagProps {
 const InteractableTag: React.FC<InteractableTagProps> = ({ tagName, onClick }) => {
     const [isHovered, setIsHovered] = useState(false);
 
-    const handleMouseEnter = () => {
+    const onMouseEnter = () => {
         setIsHovered(true);
     };
 
-    const handleMouseLeave = () => {
+    const onMouseLeave = () => {
         setIsHovered(false);
     };
 
@@ -26,12 +25,12 @@ const InteractableTag: React.FC<InteractableTagProps> = ({ tagName, onClick }) =
         <Badge
             pill
             bg={isHovered ? 'danger' : 'primary'}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
             onClick={handleClick}
             style={{ cursor: 'pointer' }}
         >
-            {tagName} {isHovered && <FaTimes />}
+            {tagName}
         </Badge>
     );
 };
